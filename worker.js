@@ -1,12 +1,11 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // HyperStream Ultimate - Professional Stremio/Nuvio Cloudflare Worker Addon
-// Version 10.0.0 - Complete Anime + Adult Catalog with Working Streams
+// Version 11.0.0 - Complete Anime Catalog with Working Streams
 // 
 // Architecture:
 // - Movies/Series: Proxied from Cinemeta API (50k+ titles)
 // - Anime: DYNAMIC fetch from Anikoto API (8,909 anime across ~89 pages)
-// - Adult: Massive catalog (100+ entries) with Pornhub embeds
-// - Streams: Multiple working sources with iframe support
+// - Streams: Multiple working sources with iframe support (plays inside app)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 // ─── ANIME CACHE SYSTEM ──────────────────────────────────────────────────────
@@ -101,64 +100,7 @@ function generateEpisodesForAnime(animeId, epCount) {
   return videos;
 }
 
-// ─── ADULT CATALOG SYSTEM ────────────────────────────────────────────────────
 
-const ADULT_CATALOG = [];
-
-// Generate 100+ adult entries with REALISTIC IDs
-for (let i = 1; i <= 100; i++) {
-  const videoId = generatePornhubVideoId(i);
-  
-  ADULT_CATALOG.push({
-    id: `adult_${i}`,
-    type: 'other',
-    name: getAdultTitle(i),
-    poster: `https://picsum.photos/seed/adult${i}/300/450`,
-    background: `https://picsum.photos/seed/bg${i}/1280/720`,
-    description: 'Premium adult entertainment content.',
-    genres: ['Adult', '18+'],
-    behaviorHints: { adult: true }
-  });
-}
-
-function generatePornhubVideoId(seed) {
-  // Generate varied but valid-looking IDs
-  const baseIds = [
-    'ph5e5b2f01919ad', 'ph56c6c95c8789b', 'ph57a97bd416bd6', 
-    'ph583108abd796', 'ph55c1a0e1cbf54', 'ph59a1e0e1bf9ae',
-    'ph5fc1bb2b38739f', 'ph5d99207b19b0cd', 'ph60723322b19b0d'
-  ];
-  return baseIds[seed % baseIds.length] + String(seed);
-}
-
-function getAdultTitle(idx) {
-  const titles = [
-    "Premium Collection Vol " + idx,
-    "Midnight Desire " + idx,
-    "Velvet Nights " + idx,
-    "Intimate Moments " + idx,
-    "Forbidden Fantasies " + idx,
-    "Sensual Cinema " + idx,
-    "Passionate Encounter " + idx,
-    "Hidden Desires " + idx,
-    "Wild Temptation " + idx,
-    "Romantic Escapade " + idx,
-    "Erotic Adventure " + idx,
-    "Seductive Story " + idx,
-    "Adult Entertainment " + idx,
-    "Mature Content " + idx,
-    "XXX Premium " + idx,
-    "18+ Exclusive " + idx,
-    "Uncut Version " + idx,
-    "Directors Cut " + idx,
-    "Extended Edition " + idx,
-    "Remastered Quality " + idx,
-    "4K Ultra HD " + idx,
-    "VR Experience " + idx,
-    "Interactive Content " + idx
-  ];
-  return titles[idx % titles.length];
-}
 
 // ─── STREAM GENERATION FUNCTIONS ─────────────────────────────────────────────
 
@@ -172,17 +114,17 @@ function generateMovieStreams(id, headers) {
     streams: [
       {
         name: '🎬 Play Now',
-        externalUrl: `https://vidsrc.to/embed/movie/${tmdbId}`,
+        url: `https://vidsrc.to/embed/movie/${tmdbId}`,
         behaviorHints: { notWebReady: false, iframe: true }
       },
       {
         name: '🎬 Alternative',
-        externalUrl: `https://2embed.cc/embedmovie/${tmdbId}`,
+        url: `https://2embed.cc/embedmovie/${tmdbId}`,
         behaviorHints: { notWebReady: false, iframe: true }
       },
       {
         name: '🎬 Backup Source',
-        externalUrl: `https://autoembed.cc/embedmovie/${tmdbId}`,
+        url: `https://autoembed.cc/embedmovie/${tmdbId}`,
         behaviorHints: { notWebReady: false, iframe: true }
       }
     ]
@@ -199,17 +141,17 @@ function generateSeriesStreams(id, season, episode, headers) {
     streams: [
       {
         name: '📺 Play Now',
-        externalUrl: `https://vidsrc.to/embed/tv/${tmdbId}/${season}/${episode}`,
+        url: `https://vidsrc.to/embed/tv/${tmdbId}/${season}/${episode}`,
         behaviorHints: { notWebReady: false, iframe: true }
       },
       {
         name: '📺 Alternative',
-        externalUrl: `https://2embed.cc/embedtv/${tmdbId}/${season}/${episode}`,
+        url: `https://2embed.cc/embedtv/${tmdbId}/${season}/${episode}`,
         behaviorHints: { notWebReady: false, iframe: true }
       },
       {
         name: '📺 Backup Source',
-        externalUrl: `https://autoembed.cc/embedtv/${tmdbId}/${season}/${episode}`,
+        url: `https://autoembed.cc/embedtv/${tmdbId}/${season}/${episode}`,
         behaviorHints: { notWebReady: false, iframe: true }
       }
     ]
@@ -225,36 +167,13 @@ function generateAnimeStreams(animeId, season, episode, headers) {
     streams: [
       {
         name: '🎌 Stream 1',
-        externalUrl: `https://vidsrc.to/embed/movie/${animeId.replace('anime_', '')}`,
+        url: `https://vidsrc.to/embed/movie/${animeId.replace('anime_', '')}`,
         behaviorHints: { notWebReady: false, iframe: true }
       },
       {
         name: '🎌 Backup',
-        externalUrl: `https://2embed.cc/embedmovie/${animeId.replace('anime_', '')}`,
+        url: `https://2embed.cc/embedmovie/${animeId.replace('anime_', '')}`,
         behaviorHints: { notWebReady: false, iframe: true }
-      }
-    ]
-  }), { headers });
-}
-
-/**
- * Generate adult content streams with Pornhub embeds
- */
-function generateAdultStreams(adultId, headers) {
-  const numericId = adultId.replace('adult_', '');
-  const phVideoId = generatePornhubVideoId(parseInt(numericId));
-  
-  return new Response(JSON.stringify({
-    streams: [
-      {
-        name: '🔞 Pornhub',
-        externalUrl: `https://www.pornhub.com/embed/${phVideoId}`,
-        behaviorHints: { notWebReady: false, iframe: true, adult: true }
-      },
-      {
-        name: '🔞 Alternative',
-        externalUrl: `https://vidsrc.to/embed/movie/${numericId}`,
-        behaviorHints: { notWebReady: false, iframe: true, adult: true }
       }
     ]
   }), { headers });
@@ -327,15 +246,14 @@ function handleManifest(headers) {
     id: 'hyperstream.ultimate',
     version: '10.0.0',
     name: '🎬 HyperStream Ultimate',
-    description: 'Ultimate streaming addon with Movies, Series, Anime (8,909+), and Adult content',
+    description: 'Ultimate streaming addon with Movies, Series, and Anime (8,909+)'
     logo: 'https://github.com/hyperstream/logo.png',
     resources: ['catalog', 'meta', 'stream'],
     types: ['movie', 'series', 'other'],
     catalogs: [
       { type: 'movie', id: 'hyperstream_movies', name: '🎬 HyperStream Movies', extra: [{ name: 'search', isRequired: false }] },
       { type: 'series', id: 'hyperstream_series', name: '📺 HyperStream Series', extra: [{ name: 'search', isRequired: false }] },
-      { type: 'other', id: 'hyperstream_anime', name: '🎌 HyperStream Anime (8,909+)', extra: [{ name: 'search', isRequired: false }] },
-      { type: 'other', id: 'hyperstream_adult', name: '🔞 Adult Content (18+)', extra: [{ name: 'search', isRequired: false }] }
+      { type: 'other', id: 'hyperstream_anime', name: '🎌 HyperStream Anime (8,909+)', extra: [{ name: 'search', isRequired: false }] }
     ],
     behaviorHints: {
       configurable: true,
@@ -370,8 +288,6 @@ async function handleCatalog(url, path, headers) {
       return await handleSeriesCatalog(skip, search, headers);
     case 'hyperstream_anime':
       return await handleAnimeCatalog(skip, search, headers);
-    case 'hyperstream_adult':
-      return handleAdultCatalog(skip, search, headers);
     default:
       return new Response(JSON.stringify({ metas: [] }), { headers });
   }
@@ -426,22 +342,7 @@ async function handleAnimeCatalog(skip, search, headers) {
   }
 }
 
-function handleAdultCatalog(skip, search, headers) {
-  let filteredAdult = ADULT_CATALOG;
-  
-  // Apply search filter if provided
-  if (search) {
-    const searchLower = search.toLowerCase();
-    filteredAdult = ADULT_CATALOG.filter(item => 
-      item.name.toLowerCase().includes(searchLower)
-    );
-  }
-  
-  // Paginate results
-  const paginatedAdult = filteredAdult.slice(skip, skip + 100);
-  
-  return new Response(JSON.stringify({ metas: paginatedAdult }), { headers });
-}
+
 
 // ─── META HANDLER ────────────────────────────────────────────────────────────
 
@@ -460,11 +361,6 @@ async function handleMeta(path, headers) {
     // Check if it's an anime ID
     if (id.startsWith('anime_')) {
       return await handleAnimeMeta(id, headers);
-    }
-    
-    // Check if it's an adult ID
-    if (id.startsWith('adult_')) {
-      return handleAdultMeta(id, headers);
     }
     
     // For movies/series, proxy to Cinemeta
@@ -490,15 +386,7 @@ async function handleAnimeMeta(id, headers) {
   return new Response(JSON.stringify({ meta: anime }), { headers });
 }
 
-function handleAdultMeta(id, headers) {
-  const adultItem = ADULT_CATALOG.find(a => a.id === id);
-  
-  if (!adultItem) {
-    return new Response(JSON.stringify({}), { status: 404, headers });
-  }
-  
-  return new Response(JSON.stringify({ meta: adultItem }), { headers });
-}
+
 
 // ─── STREAM HANDLER ──────────────────────────────────────────────────────────
 
@@ -526,10 +414,6 @@ async function handleStream(url, path, headers) {
   }
   
   // Route to appropriate stream generator based on content type
-  if (id.startsWith('adult_')) {
-    return generateAdultStreams(id, headers);
-  }
-  
   if (id.startsWith('anime_')) {
     return generateAnimeStreams(id, season, episode, headers);
   }
