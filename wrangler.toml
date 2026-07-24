@@ -1,0 +1,8 @@
+name = "hyperstream-addon"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[vars]
+ENVIRONMENT = "production"
+ADDON_NAME = "HyperStream"
