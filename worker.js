@@ -172,17 +172,17 @@ function generateMovieStreams(id, headers) {
     streams: [
       {
         name: '🎬 Play Now',
-        url: `https://vidsrc.to/embed/movie/${tmdbId}`,
+        externalUrl: `https://vidsrc.to/embed/movie/${tmdbId}`,
         behaviorHints: { notWebReady: false, iframe: true }
       },
       {
         name: '🎬 Alternative',
-        url: `https://2embed.cc/embedmovie/${tmdbId}`,
+        externalUrl: `https://2embed.cc/embedmovie/${tmdbId}`,
         behaviorHints: { notWebReady: false, iframe: true }
       },
       {
         name: '🎬 Backup Source',
-        url: `https://autoembed.cc/embedmovie/${tmdbId}`,
+        externalUrl: `https://autoembed.cc/embedmovie/${tmdbId}`,
         behaviorHints: { notWebReady: false, iframe: true }
       }
     ]
@@ -199,17 +199,17 @@ function generateSeriesStreams(id, season, episode, headers) {
     streams: [
       {
         name: '📺 Play Now',
-        url: `https://vidsrc.to/embed/tv/${tmdbId}/${season}/${episode}`,
+        externalUrl: `https://vidsrc.to/embed/tv/${tmdbId}/${season}/${episode}`,
         behaviorHints: { notWebReady: false, iframe: true }
       },
       {
         name: '📺 Alternative',
-        url: `https://2embed.cc/embedtv/${tmdbId}/${season}/${episode}`,
+        externalUrl: `https://2embed.cc/embedtv/${tmdbId}/${season}/${episode}`,
         behaviorHints: { notWebReady: false, iframe: true }
       },
       {
         name: '📺 Backup Source',
-        url: `https://autoembed.cc/embedtv/${tmdbId}/${season}/${episode}`,
+        externalUrl: `https://autoembed.cc/embedtv/${tmdbId}/${season}/${episode}`,
         behaviorHints: { notWebReady: false, iframe: true }
       }
     ]
@@ -225,12 +225,12 @@ function generateAnimeStreams(animeId, season, episode, headers) {
     streams: [
       {
         name: '🎌 Stream 1',
-        url: `https://vidsrc.to/embed/movie/${animeId.replace('anime_', '')}`,
+        externalUrl: `https://vidsrc.to/embed/movie/${animeId.replace('anime_', '')}`,
         behaviorHints: { notWebReady: false, iframe: true }
       },
       {
         name: '🎌 Backup',
-        url: `https://2embed.cc/embedmovie/${animeId.replace('anime_', '')}`,
+        externalUrl: `https://2embed.cc/embedmovie/${animeId.replace('anime_', '')}`,
         behaviorHints: { notWebReady: false, iframe: true }
       }
     ]
@@ -248,12 +248,12 @@ function generateAdultStreams(adultId, headers) {
     streams: [
       {
         name: '🔞 Pornhub',
-        url: `https://www.pornhub.com/embed/${phVideoId}`,
+        externalUrl: `https://www.pornhub.com/embed/${phVideoId}`,
         behaviorHints: { notWebReady: false, iframe: true, adult: true }
       },
       {
         name: '🔞 Alternative',
-        url: `https://vidsrc.to/embed/movie/${numericId}`,
+        externalUrl: `https://vidsrc.to/embed/movie/${numericId}`,
         behaviorHints: { notWebReady: false, iframe: true, adult: true }
       }
     ]
