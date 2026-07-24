@@ -246,7 +246,7 @@ function handleManifest(headers) {
     id: 'hyperstream.ultimate',
     version: '10.0.0',
     name: '🎬 HyperStream Ultimate',
-    description: 'Ultimate streaming addon with Movies, Series, and Anime (8,909+)'
+    description: 'Ultimate streaming addon with Movies, Series, and Anime (8,909+)',
     logo: 'https://github.com/hyperstream/logo.png',
     resources: ['catalog', 'meta', 'stream'],
     types: ['movie', 'series', 'other'],
