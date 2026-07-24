@@ -1,6 +1,6 @@
 // ═══════════════════════════════════════════════════════════════════════════════
 // HyperStream Ultimate - Professional Stremio/Nuvio Cloudflare Worker Addon
-// Version 13.0.0 - Complete Anime Catalog with WORKING Streams
+// Version 14.0.0 - Complete Anime Catalog with WORKING Streams
 // 
 // Architecture:
 // - Movies/Series: Proxied from Cinemeta API (50k+ titles)
@@ -89,29 +89,22 @@ function generateEpisodesForAnime(animeId, epCount) {
 // ─── EMBED SOURCE CONFIGURATION ──────────────────────────────────────────────
 
 /**
- * Embed source configurations - these will be proxied through our worker
- * to bypass iframe restrictions and play inside Stremio app
+ * Embed source configurations - Using user-specified servers:
+ * - videasy.to for Movies & Series
+ * - megaplay.buzz for Anime
+ * All proxied through worker to bypass iframe restrictions
  */
 const EMBED_SOURCES = {
   movie: [
-    { name: '🎬 VidSrc', baseUrl: 'https://vidsrc.to/embed/movie' },
-    { name: '🎬 VidSrc2', baseUrl: 'https://vidsrc2.to/embed/movie' },
-    { name: '🎬 SuperEmbeds', baseUrl: 'https://superembeds.com/embed/movie' },
-    { name: '🎬 Embedsu', baseUrl: 'https://embed.su/embed/movie' },
-    { name: '🎬 2Embed', baseUrl: 'https://www.2embed.cc/embedmovie' }
+    { name: '🎬 Videasy', baseUrl: 'https://videasy.to/embed/movie' }
   ],
   series: [
-    { name: '📺 VidSrc', baseUrl: 'https://vidsrc.to/embed/tv' },
-    { name: '📺 VidSrc2', baseUrl: 'https://vidsrc2.to/embed/tv' },
-    { name: '📺 SuperEmbeds', baseUrl: 'https://superembeds.com/embed/tv' },
-    { name: '📺 Embedsu', baseUrl: 'https://embed.su/embed/tv' },
-    { name: '📺 2Embed', baseUrl: 'https://www.2embed.cc/embedtv' }
+    { name: '📺 Videasy', baseUrl: 'https://videasy.to/embed/tv' }
   ],
   anime: [
-    { name: '🎌 VidSrc (Sub)', baseUrl: 'https://vidsrc.to/embed/movie', type: 'sub' },
-    { name: '🎌 VidSrc2 (Dub)', baseUrl: 'https://vidsrc2.to/embed/movie', type: 'dub' },
-    { name: '🎌 GogoAnime', baseUrl: 'https://gogoplay4.com/streaming.php', type: 'both' },
-    { name: '🎌 Embedsu', baseUrl: 'https://embed.su/embed/movie', type: 'sub' }
+    { name: '🎌 MegaPlay (Sub)', baseUrl: 'https://megaplay.buzz/embed/', type: 'sub' },
+    { name: '🎌 MegaPlay (Dub)', baseUrl: 'https://megaplay.buzz/embed/', type: 'dub' },
+    { name: '🎌 MegaPlay (Hindi)', baseUrl: 'https://megaplay.buzz/embed/', type: 'hindi' }
   ]
 };
 
@@ -482,7 +475,7 @@ export default {
 function handleManifest(headers) {
   const manifest = {
     id: 'hyperstream.ultimate',
-    version: '13.0.0',
+    version: '14.0.0',
     name: '🎬 HyperStream Ultimate',
     description: 'Ultimate streaming addon with Movies, Series, Anime (8,909+) - Multi-language & Working Streams!',
     logo: 'https://github.com/hyperstream/logo.png',
