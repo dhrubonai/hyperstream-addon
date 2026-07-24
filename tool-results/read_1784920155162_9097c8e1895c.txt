@@ -1,0 +1,1072 @@
+     1→- generic
+     2→  - link "Skip to content" [ref=e1]
+     3→  - banner
+     4→    - heading "Navigation Menu" [level=2, ref=e5]
+     5→    - generic
+     6→      - link "Homepage" [ref=e9]
+     7→      - navigation "Global" [ref=e21]
+     8→        - list
+     9→          - listitem [level=1]
+    10→            - generic
+    11→              - button "Platform" [expanded=false, ref=e259]
+    12→          - listitem [level=1]
+    13→            - generic
+    14→              - button "Solutions" [expanded=false, ref=e260]
+    15→          - listitem [level=1]
+    16→            - generic
+    17→              - button "Resources" [expanded=false, ref=e261]
+    18→          - listitem [level=1]
+    19→            - generic
+    20→              - button "Open Source" [expanded=false, ref=e262]
+    21→          - listitem [level=1]
+    22→            - generic
+    23→              - button "Enterprise" [expanded=false, ref=e263]
+    24→          - listitem [level=1]
+    25→            - link "Pricing" [ref=e157]
+    26→      - generic
+    27→        - button "Search or jump to…" [ref=e22]
+    28→      - link "Sign in" [ref=e23]
+    29→      - link "Sign up" [ref=e11]
+    30→      - button "Appearance settings" [ref=e12]
+    31→- main
+    32→  - generic
+    33→    - link "Inside4ndroid" [ref=e6]
+    34→    - StaticText "/"
+    35→    - strong
+    36→      - link "TMDB-Embed-API" [ref=e10]
+    37→    - StaticText "Public"
+    38→    - list
+    39→      - listitem [level=1]
+    40→        - link "You must be signed in to change notification settings" [ref=e24]
+    41→          - StaticText "Notifications"
+    42→      - listitem [level=1]
+    43→        - link "Fork 121" [ref=e25]
+    44→          - StaticText "Fork "
+    45→          - StaticText "121"
+    46→      - listitem [level=1]
+    47→        - link "You must be signed in to star a repository" [ref=e26]
+    48→          - StaticText " Star "
+    49→          - StaticText "123"
+    50→    - navigation "Repository" [ref=e7]
+    51→      - list
+    52→        - listitem [level=1]
+    53→          - link "Code" [ref=e27]
+    54→            - StaticText "Code"
+    55→        - listitem [level=1]
+    56→          - link "Issues 3" [ref=e28]
+    57→            - StaticText "Issues"
+    58→            - StaticText "3"
+    59→        - listitem [level=1]
+    60→          - link "Pull requests" [ref=e29]
+    61→            - StaticText "Pull requests"
+    62→        - listitem [level=1]
+    63→          - link "Actions" [ref=e30]
+    64→            - StaticText "Actions"
+    65→        - listitem [level=1]
+    66→          - link "Projects" [ref=e31]
+    67→            - StaticText "Projects"
+    68→        - listitem [level=1]
+    69→          - link "Security and quality" [ref=e32]
+    70→            - StaticText "Security and quality"
+    71→        - listitem [level=1]
+    72→          - link "Insights" [ref=e33]
+    73→            - StaticText "Insights"
+    74→  - generic [ref=e13] focusable [tabindex]
+    75→    - sectionheader
+    76→      - heading "Inside4ndroid/TMDB-Embed-API" [level=1, ref=e95]
+    77→    - button "main branch" [expanded=false, ref=e64]
+    78→      - StaticText "main"
+    79→    - link "1 Branch" [ref=e34]
+    80→      - strong
+    81→        - StaticText "1 "
+    82→      - StaticText "Branch"
+    83→    - link "12 Tags" [ref=e35]
+    84→      - strong
+    85→        - StaticText "12 "
+    86→      - StaticText "Tags"
+    87→    - button "Code" [expanded=false, ref=e36]
+    88→      - StaticText "Code"
+    89→    - heading "Folders and files" [level=2, ref=e37]
+    90→    - table "Folders and files"
+    91→      - rowgroup
+    92→        - row
+    93→          - columnheader "Name" [ref=e158]
+    94→          - columnheader "Last commit message" [ref=e159]
+    95→            - StaticText "Last commit message"
+    96→          - columnheader "Last commit date" [ref=e160]
+    97→            - StaticText "Last commit date"
+    98→      - row
+    99→        - cell "Latest commit Inside4ndroid commits by Inside4ndroid Merge pull request #57 from venxm14/main Open commit details success Commit 01f06f8 · last month History 77 Commits" [ref=e96]
+   100→          - heading "Latest commit" [level=2, ref=e161]
+   101→          - link "Inside4ndroid" [ref=e162]
+   102→            - image "Inside4ndroid"
+   103→          - link "commits by Inside4ndroid" [ref=e163]
+   104→            - StaticText "Inside4ndroid"
+   105→          - link "Merge pull request" [ref=e164]
+   106→          - StaticText " "
+   107→          - link "#57" [ref=e165]
+   108→          - StaticText " "
+   109→          - link "from venxm14/main" [ref=e166]
+   110→          - button "Open commit details" [expanded=false, ref=e167]
+   111→          - button "success" [ref=e168]
+   112→          - link "Commit 01f06f8" [ref=e169]
+   113→            - StaticText "01f06f8"
+   114→          - StaticText "·"
+   115→          - StaticText "last month"
+   116→          - heading "History" [level=2, ref=e170]
+   117→          - link "77 Commits" [ref=e171]
+   118→            - StaticText "77 Commits"
+   119→      - row [ref=e65] clickable [onclick]
+   120→        - cell ".github/workflows, (Directory)" [ref=e97]
+   121→          - link ".github/workflows, (Directory)" [ref=e350]
+   122→            - StaticText ".github/workflows"
+   123→        - cell "" [ref=e98]
+   124→        - cell "" [ref=e99]
+   125→      - row [ref=e66] clickable [onclick]
+   126→        - cell "providers, (Directory)" [ref=e100]
+   127→          - link "providers, (Directory)" [ref=e351]
+   128→            - StaticText "providers"
+   129→        - cell "" [ref=e101]
+   130→        - cell "" [ref=e102]
+   131→      - row [ref=e67] clickable [onclick]
+   132→        - cell "proxy, (Directory)" [ref=e103]
+   133→          - link "proxy, (Directory)" [ref=e352]
+   134→            - StaticText "proxy"
+   135→        - cell "" [ref=e104]
+   136→        - cell "" [ref=e105]
+   137→      - row [ref=e68] clickable [onclick]
+   138→        - cell "public, (Directory)" [ref=e106]
+   139→          - link "public, (Directory)" [ref=e353]
+   140→            - StaticText "public"
+   141→        - cell "" [ref=e107]
+   142→        - cell "" [ref=e108]
+   143→      - row [ref=e69] clickable [onclick]
+   144→        - cell "screenshots, (Directory)" [ref=e109]
+   145→          - link "screenshots, (Directory)" [ref=e354]
+   146→            - StaticText "screenshots"
+   147→        - cell "" [ref=e110]
+   148→        - cell "" [ref=e111]
+   149→      - row [ref=e70] clickable [onclick]
+   150→        - cell "scripts, (Directory)" [ref=e112]
+   151→          - link "scripts, (Directory)" [ref=e355]
+   152→            - StaticText "scripts"
+   153→        - cell "" [ref=e113]
+   154→        - cell "" [ref=e114]
+   155→      - row [ref=e71] clickable [onclick]
+   156→        - cell "utils, (Directory)" [ref=e115]
+   157→          - link "utils, (Directory)" [ref=e356]
+   158→            - StaticText "utils"
+   159→        - cell "" [ref=e116]
+   160→        - cell "" [ref=e117]
+   161→      - row [ref=e72] clickable [onclick]
+   162→        - cell ".dockerignore, (File)" [ref=e118]
+   163→          - link ".dockerignore, (File)" [ref=e357]
+   164→            - StaticText ".dockerignore"
+   165→        - cell "" [ref=e119]
+   166→        - cell "" [ref=e120]
+   167→      - row [ref=e73] clickable [onclick]
+   168→        - cell ".eslintignore, (File)" [ref=e121]
+   169→          - link ".eslintignore, (File)" [ref=e358]
+   170→            - StaticText ".eslintignore"
+   171→        - cell "" [ref=e122]
+   172→        - cell "" [ref=e123]
+   173→      - row [ref=e74] clickable [onclick]
+   174→        - cell ".eslintrc.cjs, (File)" [ref=e124]
+   175→          - link ".eslintrc.cjs, (File)" [ref=e359]
+   176→            - StaticText ".eslintrc.cjs"
+   177→        - cell "" [ref=e125]
+   178→        - cell "" [ref=e126]
+   179→      - row [ref=e75] clickable [onclick]
+   180→        - cell ".gitignore, (File)" [ref=e127]
+   181→          - link ".gitignore, (File)" [ref=e360]
+   182→            - StaticText ".gitignore"
+   183→        - cell "" [ref=e128]
+   184→        - cell "" [ref=e129]
+   185→      - row [ref=e76] clickable [onclick]
+   186→        - cell "CHANGELOG.md, (File)" [ref=e130]
+   187→          - link "CHANGELOG.md, (File)" [ref=e361]
+   188→            - StaticText "CHANGELOG.md"
+   189→        - cell "" [ref=e131]
+   190→        - cell "" [ref=e132]
+   191→      - row [ref=e77] clickable [onclick]
+   192→        - cell "Dockerfile, (File)" [ref=e133]
+   193→          - link "Dockerfile, (File)" [ref=e362]
+   194→            - StaticText "Dockerfile"
+   195→        - cell "" [ref=e134]
+   196→        - cell "" [ref=e135]
+   197→      - row [ref=e78] clickable [onclick]
+   198→        - cell "LICENSE.md, (File)" [ref=e136]
+   199→          - link "LICENSE.md, (File)" [ref=e363]
+   200→            - StaticText "LICENSE.md"
+   201→        - cell "" [ref=e137]
+   202→        - cell "" [ref=e138]
+   203→      - row [ref=e79] clickable [onclick]
+   204→        - cell "README.md, (File)" [ref=e139]
+   205→          - link "README.md, (File)" [ref=e364]
+   206→            - StaticText "README.md"
+   207→        - cell "" [ref=e140]
+   208→        - cell "" [ref=e141]
+   209→      - row [ref=e80] clickable [onclick]
+   210→        - cell "apiServer.js, (File)" [ref=e142]
+   211→          - link "apiServer.js, (File)" [ref=e365]
+   212→            - StaticText "apiServer.js"
+   213→        - cell "" [ref=e143]
+   214→        - cell "" [ref=e144]
+   215→      - row [ref=e81] clickable [onclick]
+   216→        - cell "docker-compose.yml, (File)" [ref=e145]
+   217→          - link "docker-compose.yml, (File)" [ref=e366]
+   218→            - StaticText "docker-compose.yml"
+   219→        - cell "" [ref=e146]
+   220→        - cell "" [ref=e147]
+   221→      - row [ref=e82] clickable [onclick]
+   222→        - cell "package-lock.json, (File)" [ref=e148]
+   223→          - link "package-lock.json, (File)" [ref=e367]
+   224→            - StaticText "package-lock.json"
+   225→        - cell "" [ref=e149]
+   226→        - cell "" [ref=e150]
+   227→      - row [ref=e83] clickable [onclick]
+   228→        - cell "package.json, (File)" [ref=e151]
+   229→          - link "package.json, (File)" [ref=e368]
+   230→            - StaticText "package.json"
+   231→        - cell "" [ref=e152]
+   232→        - cell "" [ref=e153]
+   233→      - row [ref=e84] clickable [onclick]
+   234→        - cell "restart.trigger, (File)" [ref=e154]
+   235→          - link "restart.trigger, (File)" [ref=e369]
+   236→            - StaticText "restart.trigger"
+   237→        - cell "" [ref=e155]
+   238→        - cell "" [ref=e156]
+   239→    - generic
+   240→      - heading "Repository files navigation" [level=2, ref=e85]
+   241→      - navigation "Repository files" [ref=e86]
+   242→        - list
+   243→          - listitem [level=1]
+   244→            - link "README" [ref=e264]
+   245→              - StaticText "README"
+   246→          - listitem [level=1]
+   247→            - link "MIT license" [ref=e265]
+   248→              - StaticText "MIT license"
+   249→      - button "Outline" [expanded=false, ref=e87]
+   250→    - generic [ref=e38] clickable [onclick]
+   251→      - article
+   252→        - generic
+   253→          - heading "🍿 TMDB Embed API" [level=1, ref=e172]
+   254→          - link "Permalink: 🍿 TMDB Embed API" [ref=e173]
+   255→        - blockquote
+   256→          - paragraph
+   257→            - StaticText "Modern, configurable streaming metadata + source aggregation API with a secure admin panel and multi-key TMDB rotation."
+   258→        - paragraph
+   259→          - link [ref=e174]
+   260→            - image
+   261→          - StaticText " "
+   262→          - link [ref=e175]
+   263→            - image
+   264→          - StaticText " "
+   265→          - link [ref=e176]
+   266→            - image
+   267→          - StaticText " "
+   268→          - link [ref=e177]
+   269→            - image
+   270→          - StaticText " "
+   271→          - link [ref=e178]
+   272→            - image
+   273→        - separator
+   274→        - generic
+   275→          - heading "📸 Screenshots" [level=2, ref=e179]
+   276→          - link "Permalink: 📸 Screenshots" [ref=e180]
+   277→        - paragraph
+   278→          - link [ref=e181]
+   279→            - image
+   280→          - StaticText " "
+   281→          - link [ref=e182]
+   282→            - image
+   283→        - paragraph
+   284→          - link [ref=e183]
+   285→            - image
+   286→          - StaticText " "
+   287→          - link [ref=e184]
+   288→            - image
+   289→        - paragraph
+   290→          - link [ref=e185]
+   291→            - image
+   292→          - StaticText " "
+   293→          - link [ref=e186]
+   294→            - image
+   295→        - paragraph
+   296→          - link [ref=e187]
+   297→            - image
+   298→          - StaticText " "
+   299→          - link [ref=e188]
+   300→            - image
+   301→        - separator
+   302→        - generic
+   303→          - heading "✨ Features" [level=2, ref=e189]
+   304→          - link "Permalink: ✨ Features" [ref=e190]
+   305→        - list
+   306→          - listitem [level=1]
+   307→            - ListMarker "• "
+   308→            - paragraph
+   309→              - strong
+   310→                - StaticText "Multi‑TMDB Key Rotation"
+   311→              - StaticText " – Supply multiple API keys; one is chosen randomly per request."
+   312→          - listitem [level=1]
+   313→            - ListMarker "• "
+   314→            - paragraph
+   315→              - strong
+   316→                - StaticText "Provider Aggregation"
+   317→              - StaticText " – Pluggable providers (Showbox/FebBox, 4KHDHub, VixSrc, Videasy, Vidlink, LordFlix, NoTorrent, DahmerMovies) with per‑provider enable toggles + default selection."
+   318→          - listitem [level=1]
+   319→            - ListMarker "• "
+   320→            - paragraph
+   321→              - strong
+   322→                - StaticText "🔥 Plugin System"
+   323→              - StaticText " – Drop new provider files in "
+   324→              - code
+   325→                - StaticText "providers/"
+   326→              - StaticText " and add its exported function to the registry map ("
+   327→              - code
+   328→                - StaticText "providers/registry.js"
+   329→              - StaticText " → "
+   330→              - code
+   331→                - StaticText "providerFunctionMap"
+   332→              - StaticText ")."
+   333→          - listitem [level=1]
+   334→            - ListMarker "• "
+   335→            - paragraph
+   336→              - strong
+   337→                - StaticText "Dynamic Filtering"
+   338→              - StaticText " – Minimum quality presets, custom JSON quality map, codec exclusion rules (presets + JSON)."
+   339→          - listitem [level=1]
+   340→            - ListMarker "• "
+   341→            - paragraph
+   342→              - strong
+   343→                - StaticText "Runtime Overrides UI"
+   344→              - StaticText " – Fully interactive web admin at "
+   345→              - code
+   346→                - StaticText "/"
+   347→              - StaticText " (login protected) writing to "
+   348→              - code
+   349→                - StaticText "utils/user-config.json"
+   350→              - StaticText "."
+   351→          - listitem [level=1]
+   352→            - ListMarker "• "
+   353→            - paragraph
+   354→              - strong
+   355→                - StaticText "Session Auth + Rate Limiting"
+   356→              - StaticText " – Login system with brute‑force lockouts, logout, password change."
+   357→          - listitem [level=1]
+   358→            - ListMarker "• "
+   359→            - paragraph
+   360→              - strong
+   361→                - StaticText "Status & Health Panel"
+   362→              - StaticText " – Live metrics, provider status, endpoint list, functional provider checks."
+   363→          - listitem [level=1]
+   364→            - ListMarker "• "
+   365→            - paragraph
+   366→              - strong
+   367→                - StaticText "Config Propagation"
+   368→              - StaticText " – Overrides mirrored to "
+   369→              - code
+   370→                - StaticText "process.env"
+   371→              - StaticText " for legacy compatibility (no "
+   372→              - code
+   373→                - StaticText ".env"
+   374→              - StaticText " required after first save)."
+   375→          - listitem [level=1]
+   376→            - ListMarker "• "
+   377→            - paragraph
+   378→              - strong
+   379→                - StaticText "Back‑Navigation Safe"
+   380→              - StaticText " – Cache-control + visibility/session revalidation."
+   381→          - listitem [level=1]
+   382→            - ListMarker "• "
+   383→            - paragraph
+   384→              - strong
+   385→                - StaticText "Extensible"
+   386→              - StaticText " – Simple drop-in provider plugin system."
+   387→          - listitem [level=1]
+   388→            - ListMarker "• "
+   389→            - paragraph
+   390→              - strong
+   391→                - StaticText "Optional Stream Proxy Layer"
+   392→              - StaticText " – When enabled, rewrites returned stream URLs so HLS playlists, TS segments, and subtitles are served through internal endpoints ("
+   393→              - code
+   394→                - StaticText "/m3u8-proxy"
+   395→              - StaticText ", "
+   396→              - code
+   397→                - StaticText "/ts-proxy"
+   398→              - StaticText ", "
+   399→              - code
+   400→                - StaticText "/sub-proxy"
+   401→              - StaticText ") allowing uniform headers, origin shielding, and optional segment caching. When active the API omits per-stream "
+   402→              - code
+   403→                - StaticText "headers"
+   404→              - StaticText " objects from responses (they're no longer needed by clients) to avoid leaking upstream header requirements."
+   405→            - paragraph
+   406→              - StaticText "Proxy Tuning Parameters (query flags accepted by "
+   407→              - code
+   408→                - StaticText "/ts-proxy"
+   409→              - StaticText " – defaults shown):"
+   410→            - list
+   411→              - listitem [level=2]
+   412→                - ListMarker "◦ "
+   413→                - code
+   414→                - StaticText " (on) – If a client sends an ambiguous "
+   415→                - code
+   416→                  - StaticText "Range: bytes=0-"
+   417→              - listitem [level=2]
+   418→              - listitem [level=2]
+   419→              - listitem [level=2]
+   420→              - listitem [level=2]
+   421→              - listitem [level=2]
+   422→              - listitem [level=2]
+   423→              - listitem [level=2]
+   424→              - listitem [level=2]
+   425→              - listitem [level=2]
+   426→              - listitem [level=2]
+   427→              - listitem [level=2]
+   428→                - StaticText "Host Overrides: "
+   429→        - separator
+   430→        - generic
+   431→          - heading "📦 Quick Start" [level=2, ref=e191]
+   432→          - link "Permalink: 📦 Quick Start" [ref=e192]
+   433→        - generic
+   434→          - generic
+   435→            - StaticText "# 1. Install dependencies\nnpm install\n\n# 2. (Optional) Copy example env if you want an initial TMDB key\ncp .env.example .env   # then edit TMDB_API_KEY=\n\n# 3. Start API with automatic restarts (recommended for local dev)\nnpm start\n\n# Or production-style single run\n# node apiServer.js\n\n# 4. Open the Admin UI (login page) in browser\nhttp://localhost:8787/\n\n# 5. Health check\ncurl http://localhost:8787/api/health"
+   436→          - button "Copy code to clipboard" [ref=e193]
+   437→        - separator
+   438→        - generic
+   439→          - heading "🐳 Docker Usage" [level=2, ref=e194]
+   440→          - link "Permalink: 🐳 Docker Usage" [ref=e195]
+   441→        - generic
+   442→          - heading "Pull & Run (Fastest)" [level=3, ref=e196]
+   443→          - link "Permalink: Pull & Run (Fastest)" [ref=e197]
+   444→        - paragraph
+   445→          - StaticText "If you just want to run it (no building):"
+   446→        - generic
+   447→          - generic
+   448→            - StaticText "docker pull inside4ndroid/tmdb-embed-api:latest\ndocker run --name tmdb-embed-api -p 8787:8787 \\ \n  -e TMDB_API_KEY=YOUR_TMDB_KEY \\\n  inside4ndroid/tmdb-embed-api:latest"
+   449→          - button "Copy code to clipboard" [ref=e198]
+   450→        - paragraph
+   451→          - StaticText "Or the minimal quick-test run:"
+   452→        - generic
+   453→          - StaticText "docker run -it -p 8787:8787 inside4ndroid/tmdb-embed-api:latest"
+   454→          - button "Copy code to clipboard" [ref=e199]
+   455→        - paragraph
+   456→          - StaticText "Persist overrides (Windows PowerShell example) by mounting a local file:"
+   457→        - generic
+   458→          - generic
+   459→            - StaticText "New-Item -ItemType File -Path .\\utils\\user-config.json -Force | Out-Null\ndocker run --name tmdb-embed-api -p 8787:8787 `\n  -e TMDB_API_KEY=YOUR_TMDB_KEY `\n  -v ${PWD}/utils/user-config.json:/app/utils/user-config.json `\n  inside4ndroid/tmdb-embed-api:latest"
+   460→          - button "Copy code to clipboard" [ref=e200]
+   461→        - generic
+   462→          - heading "Build Locally" [level=3, ref=e201]
+   463→          - link "Permalink: Build Locally" [ref=e202]
+   464→        - generic
+   465→          - generic
+   466→            - StaticText "docker build -t tmdb-embed-api .\ndocker run --name tmdb-embed -p 8787:8787 \\\n  -e TMDB_API_KEY=YOUR_TMDB_KEY \\\n  -v \"$(pwd)/utils/user-config.json:/app/utils/user-config.json\" \\\n  tmdb-embed-api"
+   467→          - button "Copy code to clipboard" [ref=e203]
+   468→        - paragraph
+   469→          - StaticText "After first login + save, the UI writes overrides into the mounted "
+   470→          - code
+   471→            - StaticText "user-config.json"
+   472→          - StaticText " so they persist across container restarts."
+   473→        - generic
+   474→          - heading "docker-compose" [level=3, ref=e204]
+   475→          - link "Permalink: docker-compose" [ref=e205]
+   476→        - paragraph
+   477→          - StaticText "An example "
+   478→          - code
+   479→            - StaticText "docker-compose.yml"
+   480→          - StaticText " is included. Start with:"
+   481→        - generic
+   482→          - StaticText "docker compose up -d --build"
+   483→          - button "Copy code to clipboard" [ref=e206]
+   484→        - paragraph
+   485→          - StaticText "Environment variables can be supplied via a "
+   486→          - code
+   487→            - StaticText ".env"
+   488→          - StaticText " file in the same directory (Compose automatically loads it). Example "
+   489→          - code
+   490→            - StaticText ".env"
+   491→          - StaticText ":"
+   492→        - generic
+   493→          - code
+   494→            - StaticText "TMDB_API_KEY=first_key\n"
+   495→          - button "Copy code to clipboard" [ref=e207]
+   496→        - paragraph
+   497→          - StaticText "To stop & remove:"
+   498→        - generic
+   499→          - StaticText "docker compose down"
+   500→          - button "Copy code to clipboard" [ref=e208]
+   501→        - generic
+   502→          - heading "Switching to Multiple TMDB Keys" [level=3, ref=e209]
+   503→          - link "Permalink: Switching to Multiple TMDB Keys" [ref=e210]
+   504→        - paragraph
+   505→          - StaticText "Either set "
+   506→          - code
+   507→            - StaticText "TMDB_API_KEYS"
+   508→          - StaticText " to a JSON array string:"
+   509→        - generic
+   510→          - generic
+   511→            - StaticText "docker run -p 8787:8787 \\\n  -e TMDB_API_KEYS='[\"KEY1\",\"KEY2\",\"KEY3\"]' \\\n  tmdb-embed-api"
+   512→          - button "Copy code to clipboard" [ref=e211]
+   513→        - paragraph
+   514→          - StaticText "or add / remove keys inside the Admin UI (Keys panel) and save."
+   515→        - generic
+   516→          - heading "Key Environment Variables" [level=3, ref=e212]
+   517→          - link "Permalink: Key Environment Variables" [ref=e213]
+   518→        - table
+   519→          - rowgroup
+   520→            - row
+   521→              - columnheader "Variable" [ref=e370]
+   522→              - columnheader "Purpose" [ref=e371]
+   523→              - columnheader "Notes" [ref=e372]
+   524→          - row
+   525→            - cell "API_PORT" [ref=e266]
+   526→              - code
+   527→            - cell "Port the server listens on" [ref=e267]
+   528→            - cell "Defaults to 8787" [ref=e268]
+   529→          - row
+   530→            - cell "TMDB_API_KEY" [ref=e269]
+   531→              - code
+   532→            - cell "Single TMDB key (legacy)" [ref=e270]
+   533→            - cell "Use if you only have one key" [ref=e271]
+   534→          - row
+   535→            - cell "TMDB_API_KEYS" [ref=e272]
+   536→              - code
+   537→            - cell "JSON array of keys" [ref=e273]
+   538→            - cell "Overrides single key when present" [ref=e274]
+   539→          - row
+   540→            - cell "PASSWORD_HASH" [ref=e275]
+   541→              - code
+   542→            - cell "Pre-seed admin password hash" [ref=e276]
+   543→            - cell "Optional (UI can set)" [ref=e277]
+   544→          - row
+   545→            - cell "ADMIN_USERNAME" [ref=e278]
+   546→              - code
+   547→            - cell "Override default username" [ref=e279]
+   548→            - cell "Default: admin" [ref=e280]
+   549→              - StaticText "Default: "
+   550→              - code
+   551→        - paragraph
+   552→          - StaticText "If both "
+   553→          - code
+   554→            - StaticText "TMDB_API_KEY"
+   555→          - StaticText " and "
+   556→          - code
+   557→            - StaticText "TMDB_API_KEYS"
+   558→          - StaticText " are provided, rotation uses the array. Clearing the array in the UI also clears the legacy key."
+   559→        - separator
+   560→        - generic
+   561→          - heading "Updating the Image" [level=3, ref=e214]
+   562→          - link "Permalink: Updating the Image" [ref=e215]
+   563→        - generic
+   564→          - generic
+   565→            - StaticText "docker compose pull   # if using an external registry (future)\ndocker compose up -d --build\n\n### Restart from Admin UI\nThe Admin panel includes a Restart Server control.\n- Local (nodemon): the backend writes a `restart.trigger` file and exits; nodemon detects the change and restarts automatically.\n- Docker Compose: the container exits and is restarted by `restart: unless-stopped`."
+   566→          - button "Copy code to clipboard" [ref=e216]
+   567→        - generic
+   568→          - heading "Healthcheck" [level=3, ref=e217]
+   569→          - link "Permalink: Healthcheck" [ref=e218]
+   570→        - paragraph
+   571→          - StaticText "Container health relies on "
+   572→          - code
+   573→            - StaticText "GET /api/health"
+   574→          - StaticText ". If you disable or modify that route, adjust the Dockerfile / compose healthcheck accordingly."
+   575→        - separator
+   576→        - generic
+   577→          - heading "�🔐 Authentication" [level=2, ref=e219]
+   578→          - link "Permalink: �🔐 Authentication" [ref=e220]
+   579→        - paragraph
+   580→          - StaticText "The root ("
+   581→          - code
+   582→            - StaticText "/"
+   583→          - StaticText ") serves the login page. After successful login a session cookie ("
+   584→          - code
+   585→            - StaticText "session"
+   586→          - StaticText ") is issued (HttpOnly; 12h lifetime). All admin pages (e.g. "
+   587→          - code
+   588→            - StaticText "config.html"
+   589→          - StaticText ") require an active session."
+   590→        - table
+   591→          - rowgroup
+   592→            - row
+   593→              - columnheader "Endpoint" [ref=e373]
+   594→              - columnheader "Method" [ref=e374]
+   595→              - columnheader "Purpose" [ref=e375]
+   596→          - row
+   597→            - cell "/auth/login" [ref=e281]
+   598→              - code
+   599→            - cell "POST" [ref=e282]
+   600→            - cell "Authenticate (JSON: { username, password })" [ref=e283]
+   601→              - StaticText "Authenticate (JSON: "
+   602→              - code
+   603→              - StaticText ")"
+   604→          - row
+   605→            - cell "/auth/logout" [ref=e284]
+   606→              - code
+   607→            - cell "POST" [ref=e285]
+   608→            - cell "Destroy session" [ref=e286]
+   609→          - row
+   610→            - cell "/auth/session" [ref=e287]
+   611→              - code
+   612→            - cell "GET" [ref=e288]
+   613→            - cell "Check session status" [ref=e289]
+   614→          - row
+   615→            - cell "/auth/change-password" [ref=e290]
+   616→              - code
+   617→            - cell "POST" [ref=e291]
+   618→            - cell "Update password (requires session)" [ref=e292]
+   619→        - paragraph
+   620→          - StaticText "Repeated failed logins trigger exponential lockouts (Retry-After header emitted)."
+   621→        - separator
+   622→        - generic
+   623→          - heading "🛠 Configuration Model" [level=2, ref=e221]
+   624→          - link "Permalink: 🛠 Configuration Model" [ref=e222]
+   625→        - paragraph
+   626→          - StaticText "All runtime state collapses into a "
+   627→          - emphasis
+   628→            - StaticText "merged"
+   629→          - StaticText " object displayed in the UI (Live Config panel). Source order:"
+   630→        - list
+   631→          - listitem [level=1]
+   632→            - ListMarker "1. "
+   633→            - StaticText "Initial environment variables / optional "
+   634→            - code
+   635→              - StaticText ".env"
+   636→          - listitem [level=1]
+   637→            - ListMarker "2. "
+   638→            - StaticText "JSON overrides: "
+   639→            - code
+   640→              - StaticText "utils/user-config.json"
+   641→        - paragraph
+   642→          - StaticText "Saving in the UI writes only changed keys. Setting a field to empty removes the override (reverting to env/default). Removing all TMDB keys (and saving) clears "
+   643→          - code
+   644→            - StaticText "tmdbApiKeys"
+   645→          - StaticText " and the legacy "
+   646→          - code
+   647→            - StaticText "tmdbApiKey"
+   648→          - StaticText "."
+   649→        - paragraph
+   650→          - strong
+   651→            - StaticText "Override File:"
+   652→          - StaticText " "
+   653→          - code
+   654→            - StaticText "utils/user-config.json"
+   655→        - generic
+   656→          - generic
+   657→            - StaticText "{\n  \"defaultProviders\": [\"4khdhub\"],\n  \"tmdbApiKeys\": [\"KEY_A\",\"KEY_B\"],\n  \"enable4khdhubProvider\": true\n}"
+   658→          - button "Copy code to clipboard" [ref=e223]
+   659→        - separator
+   660→        - generic
+   661→          - heading "🎛 Admin UI Sections" [level=2, ref=e224]
+   662→          - link "Permalink: 🎛 Admin UI Sections" [ref=e225]
+   663→        - table
+   664→          - rowgroup
+   665→            - row
+   666→              - columnheader "Panel" [ref=e376]
+   667→              - columnheader "Summary" [ref=e377]
+   668→          - row
+   669→            - cell "Core" [ref=e293]
+   670→            - cell "Port, default providers, default region" [ref=e294]
+   671→          - row
+   672→            - cell "Quality / Filters" [ref=e295]
+   673→            - cell "Min quality presets & codec exclusion JSON" [ref=e296]
+   674→          - row
+   675→            - cell "Keys" [ref=e297]
+   676→            - cell "Add/remove TMDB API keys (rotated randomly)" [ref=e298]
+   677→          - row
+   678→            - cell "Advanced" [ref=e299]
+   679→            - cell "Provider toggles, cache & validation flags" [ref=e300]
+   680→          - row
+   681→            - cell "Server Status" [ref=e301]
+   682→            - cell "Live metrics, provider functional checks" [ref=e302]
+   683→          - row
+   684→            - cell "Live Config" [ref=e303]
+   685→            - cell "View merged + override JSON snapshots" [ref=e304]
+   686→        - paragraph
+   687→          - StaticText "Session is revalidated on visibility and back/forward navigation to prevent stale access."
+   688→        - separator
+   689→        - generic
+   690→          - heading "🔌 Providers" [level=2, ref=e226]
+   691→          - link "Permalink: 🔌 Providers" [ref=e227]
+   692→        - paragraph
+   693→          - StaticText "The API supports a plugin system. Drop a new provider file in the "
+   694→          - code
+   695→            - StaticText "providers/"
+   696→          - StaticText " folder and register its exported function in "
+   697→          - code
+   698→            - StaticText "providers/registry.js"
+   699→          - StaticText " under "
+   700→          - code
+   701→            - StaticText "providerFunctionMap"
+   702→          - StaticText "."
+   703→        - generic
+   704→          - heading "Current Built-in Providers" [level=3, ref=e228]
+   705→          - link "Permalink: Current Built-in Providers" [ref=e229]
+   706→        - list
+   707→          - listitem [level=1]
+   708→            - ListMarker "• "
+   709→            - code
+   710→              - StaticText "showbox"
+   711→            - StaticText " - Showbox/FebBox streams (requires FebBox JWT cookie)"
+   712→          - listitem [level=1]
+   713→            - ListMarker "• "
+   714→            - code
+   715→              - StaticText "4khdhub"
+   716→            - StaticText " - 4KHDHub streams"
+   717→          - listitem [level=1]
+   718→            - ListMarker "• "
+   719→            - code
+   720→              - StaticText "vixsrc"
+   721→            - StaticText " - VixSrc streams"
+   722→          - listitem [level=1]
+   723→            - ListMarker "• "
+   724→            - code
+   725→              - StaticText "videasy"
+   726→            - StaticText " - Videasy streams (10 servers via enc-dec.app)"
+   727→          - listitem [level=1]
+   728→            - ListMarker "• "
+   729→            - code
+   730→              - StaticText "vidlink"
+   731→            - StaticText " - Vidlink streams (via enc-dec.app)"
+   732→          - listitem [level=1]
+   733→            - ListMarker "• "
+   734→            - code
+   735→              - StaticText "lordflix"
+   736→            - StaticText " - LordFlix streams (9 servers via enc-dec.app)"
+   737→          - listitem [level=1]
+   738→            - ListMarker "• "
+   739→            - code
+   740→              - StaticText "notorrent"
+   741→            - StaticText " - NoTorrent streams (Stremio addon API)"
+   742→          - listitem [level=1]
+   743→            - ListMarker "• "
+   744→            - code
+   745→              - StaticText "dahmermovies"
+   746→            - StaticText " - DahmerMovies streams (direct file links)"
+   747→        - generic
+   748→          - heading "Adding a New Provider" [level=3, ref=e230]
+   749→          - link "Permalink: Adding a New Provider" [ref=e231]
+   750→        - list
+   751→          - listitem [level=1]
+   752→            - ListMarker "1. "
+   753→            - strong
+   754→              - StaticText "Create"
+   755→            - StaticText " "
+   756→            - code
+   757→              - StaticText "providers/yourprovider.js"
+   758→            - StaticText " with your stream fetching logic"
+   759→          - listitem [level=1]
+   760→            - ListMarker "2. "
+   761→            - strong
+   762→              - StaticText "Export"
+   763→            - StaticText " a function like "
+   764→            - code
+   765→              - StaticText "getYourproviderStreams(tmdbId, mediaType, season, episode)"
+   766→          - listitem [level=1]
+   767→            - ListMarker "3. "
+   768→            - strong
+   769→              - StaticText "Register"
+   770→            - StaticText " it in "
+   771→            - code
+   772→              - StaticText "providers/registry.js"
+   773→            - StaticText " → "
+   774→            - code
+   775→              - StaticText "providerFunctionMap"
+   776→            - StaticText ":"
+   777→            - generic
+   778→              - generic
+   779→                - StaticText "// providers/registry.js\nconst providerFunctionMap = {\n  'Showbox.js': 'getStreamsFromTmdbId',\n  '4khdhub.js': 'get4KHDHubStreams',\n  'vixsrc.js': 'getVixsrcStreams',\n  'videasy.js': 'getVideasyStreams',\n  'vidlink.js': 'getVidlinkStreams',\n  'lordflix.js': 'getLordflixStreams',\n  'notorrent.js': 'getNotorrentStreams',\n  'dahmermovies.js': 'getDahmermoviesStreams',\n  'yourprovider.js': 'getYourproviderStreams'\n};"
+   780→              - button "Copy code to clipboard" [ref=e378]
+   781→          - listitem [level=1]
+   782→            - ListMarker "4. "
+   783→            - StaticText "The provider will appear in the admin UI with an enable/disable toggle."
+   784→        - paragraph
+   785→          - strong
+   786→            - StaticText "Example Provider (Unified Output):"
+   787→        - generic
+   788→          - generic
+   789→            - StaticText "async function getYourproviderStreams(tmdbId, mediaType, season, episode) {\n  // Your scraping/API logic here\n  return [{\n    title: \"Fight Club - 1080p [YourProvider #1]\",\n    url: \"https://stream.url/video.mp4\",\n    quality: \"1080p\",\n    provider: \"yourprovider\",\n    headers: { \"User-Agent\": \"Mozilla/5.0\" }\n  }];\n}\n\nmodule.exports = { getYourproviderStreams };"
+   790→          - button "Copy code to clipboard" [ref=e232]
+   791→        - blockquote
+   792→          - paragraph
+   793→            - strong
+   794→            - StaticText ": All providers must return streams in the unified JSON format to ensure compatibility with filtering and aggregation."
+   795→        - paragraph
+   796→          - StaticText "The system automatically:"
+   797→        - list
+   798→          - listitem [level=1]
+   799→            - ListMarker "• "
+   800→            - StaticText "✅ Detects new provider files"
+   801→          - listitem [level=1]
+   802→            - ListMarker "• "
+   803→            - StaticText "✅ Adds enable/disable toggles in the admin UI"
+   804→          - listitem [level=1]
+   805→            - ListMarker "• "
+   806→            - StaticText "✅ Includes them in stream aggregation"
+   807→          - listitem [level=1]
+   808→            - ListMarker "• "
+   809→            - StaticText "✅ Applies filtering and quality controls"
+   810→          - listitem [level=1]
+   811→            - ListMarker "• "
+   812→            - StaticText "✅ No core file edits required!"
+   813→        - separator
+   814→        - generic
+   815→          - heading "📡 Key Endpoints" [level=2, ref=e233]
+   816→          - link "Permalink: 📡 Key Endpoints" [ref=e234]
+   817→        - table
+   818→          - rowgroup
+   819→            - row
+   820→              - columnheader "Endpoint" [ref=e379]
+   821→              - columnheader "Description" [ref=e380]
+   822→          - row
+   823→            - cell "GET /api/health" [ref=e305]
+   824→            - cell "Basic heartbeat" [ref=e306]
+   825→          - row
+   826→            - cell "GET /api/metrics" [ref=e307]
+   827→            - cell "Runtime counters & summary" [ref=e308]
+   828→          - row
+   829→            - cell "GET /api/status" [ref=e309]
+   830→            - cell "Metrics + providers + endpoints list" [ref=e310]
+   831→          - row
+   832→            - cell "GET /api/providers" [ref=e311]
+   833→            - cell "Enabled providers summary" [ref=e312]
+   834→          - row
+   835→            - cell "GET /api/providers/:name" [ref=e313]
+   836→            - cell "Single provider status" [ref=e314]
+   837→          - row
+   838→            - cell "GET /api/streams/:type/:tmdbId" [ref=e315]
+   839→            - cell "Aggregate streams (type = movie" [ref=e316]
+   840→          - row
+   841→            - cell "GET /api/streams/:provider/:type/:tmdbId" [ref=e317]
+   842→            - cell "Provider-specific streams" [ref=e318]
+   843→          - row
+   844→            - cell "GET /api/config" [ref=e319]
+   845→            - cell "{ merged, override }" [ref=e320]
+   846→          - row
+   847→            - cell "POST /api/config" [ref=e321]
+   848→            - cell "Apply override patch" [ref=e322]
+   849→        - paragraph
+   850→          - StaticText "Aggregate endpoint auto-resolves IMDb when needed and merges provider output before filtering."
+   851→        - separator
+   852→        - generic
+   853→          - heading "🧪 Stream Object Schema (Unified)" [level=2, ref=e235]
+   854→          - link "Permalink: 🧪 Stream Object Schema (Unified)" [ref=e236]
+   855→        - generic
+   856→          - generic
+   857→            - StaticText "{\n  \"title\": \"Fight Club - 1080p [MP4Hydra #2]\",\n  \"url\": \"https://stream.url/video.mp4\",\n  \"quality\": \"1080p\",\n  \"provider\": \"mp4hydra\",\n  \"headers\": { \"User-Agent\": \"Mozilla/5.0\" }\n}"
+   858→          - button "Copy code to clipboard" [ref=e237]
+   859→        - paragraph
+   860→          - StaticText "Filtering passes through "
+   861→          - code
+   862→            - StaticText "applyFilters"
+   863→          - StaticText " to enforce min quality + codec exclusions."
+   864→        - blockquote
+   865→          - paragraph
+   866→            - StaticText "Note: When the "
+   867→            - code
+   868→            - StaticText " flag is turned on, provider-specific request headers are stripped from each stream object before responding. Clients should use the proxied URL directly without adding custom Referer/Origin headers."
+   869→        - separator
+   870→        - generic
+   871→          - heading "⚙️ Configuration Flags (Advanced Panel)" [level=2, ref=e238]
+   872→          - link "Permalink: ⚙️ Configuration Flags (Advanced Panel)" [ref=e239]
+   873→        - table
+   874→          - rowgroup
+   875→            - row
+   876→              - columnheader "Flag" [ref=e381]
+   877→              - columnheader "Default" [ref=e382]
+   878→              - columnheader "Purpose" [ref=e383]
+   879→          - row
+   880→            - cell "disableCache" [ref=e323]
+   881→            - cell "false" [ref=e324]
+   882→            - cell "Disables internal caches" [ref=e325]
+   883→          - row
+   884→            - cell "disable4khdhubUrlValidation" [ref=e326]
+   885→            - cell "false" [ref=e327]
+   886→            - cell "Skip 4khdhub-specific URL validation" [ref=e328]
+   887→          - row
+   888→            - cell "enableProxy" [ref=e329]
+   889→            - cell "false" [ref=e330]
+   890→            - cell "Mounts proxy routes and rewrites stream URLs through them" [ref=e331]
+   891→        - paragraph
+   892→          - StaticText "Toggle "
+   893→          - code
+   894→            - StaticText "enableProxy"
+   895→          - StaticText " to activate the internal proxy. This adds lightweight playlist/segment/subtitle rewriting without modifying provider code. Disable it to return direct upstream URLs."
+   896→        - separator
+   897→        - generic
+   898→          - heading "🧩 Quality & Codec Filtering" [level=2, ref=e240]
+   899→          - link "Permalink: 🧩 Quality & Codec Filtering" [ref=e241]
+   900→        - list
+   901→          - listitem [level=1]
+   902→            - ListMarker "• "
+   903→            - StaticText "Presets: "
+   904→            - code
+   905→            - StaticText ", "
+   906→            - code
+   907→            - StaticText ", "
+   908→            - code
+   909→            - StaticText ", "
+   910→            - code
+   911→            - StaticText ", "
+   912→            - code
+   913→            - StaticText ", "
+   914→            - code
+   915→            - StaticText "."
+   916→          - listitem [level=1]
+   917→            - ListMarker "• "
+   918→            - StaticText "Custom quality JSON example:"
+   919→        - generic
+   920→          - generic
+   921→            - StaticText "{ \"default\": \"900p\", \"4khdhub\": \"1080p\" }"
+   922→          - button "Copy code to clipboard" [ref=e242]
+   923→        - list
+   924→          - listitem [level=1]
+   925→            - ListMarker "• "
+   926→            - StaticText "Codec exclusion JSON example:"
+   927→        - generic
+   928→          - generic
+   929→            - StaticText "{ \"excludeDV\": true, \"excludeHDR\": false }"
+   930→          - button "Copy code to clipboard" [ref=e243]
+   931→        - separator
+   932→        - generic
+   933→          - heading "🔐 Security Notes" [level=2, ref=e244]
+   934→          - link "Permalink: 🔐 Security Notes" [ref=e245]
+   935→        - list
+   936→          - listitem [level=1]
+   937→            - ListMarker "• "
+   938→            - StaticText "Admin UI requires login; session cookie is HttpOnly."
+   939→          - listitem [level=1]
+   940→            - ListMarker "• "
+   941→            - StaticText "Cache-control headers disable storing sensitive pages."
+   942→          - listitem [level=1]
+   943→            - ListMarker "• "
+   944→            - StaticText "Login is rate limited with escalating lockouts."
+   945→          - listitem [level=1]
+   946→            - ListMarker "• "
+   947→            - StaticText "Password change endpoint enforces minimum length."
+   948→        - separator
+   949→        - generic
+   950→          - heading "🚀 Deployment Tips" [level=2, ref=e246]
+   951→          - link "Permalink: 🚀 Deployment Tips" [ref=e247]
+   952→        - table
+   953→          - rowgroup
+   954→            - row
+   955→              - columnheader "Aspect" [ref=e384]
+   956→              - columnheader "Recommendation" [ref=e385]
+   957→          - row
+   958→            - cell "Node Version" [ref=e332]
+   959→            - cell "18+ LTS" [ref=e333]
+   960→          - row
+   961→            - cell "Reverse Proxy" [ref=e334]
+   962→            - cell "Terminate TLS (e.g., Nginx) and forward to API port" [ref=e335]
+   963→          - row
+   964→            - cell "Persistent Config" [ref=e336]
+   965→            - cell "Mount / persist utils/user-config.json" [ref=e337]
+   966→          - row
+   967→            - cell "Logs" [ref=e338]
+   968→            - cell "Pipe stdout to centralized logger" [ref=e339]
+   969→          - row
+   970→            - cell "Scaling" [ref=e340]
+   971→            - cell "Use a single instance unless providers are CPU bound" [ref=e341]
+   972→        - paragraph
+   973→          - StaticText "For ephemeral platforms (e.g., Vercel) note that some providers use temporary directories; avoid enabling disk-heavy cache directories."
+   974→        - separator
+   975→        - generic
+   976→          - heading "💡 Troubleshooting" [level=2, ref=e248]
+   977→          - link "Permalink: 💡 Troubleshooting" [ref=e249]
+   978→        - table
+   979→          - rowgroup
+   980→            - row
+   981→              - columnheader "Symptom" [ref=e386]
+   982→              - columnheader "Cause / Fix" [ref=e387]
+   983→          - row
+   984→            - cell "TMDB quota issues" [ref=e342]
+   985→            - cell "Add more keys under Keys panel" [ref=e343]
+   986→          - row
+   987→            - cell "Provider missing in matrix" [ref=e344]
+   988→            - cell "Ensure its enable flag exists & UI updated" [ref=e345]
+   989→          - row
+   990→            - cell "Empty merged config after restart" [ref=e346]
+   991→            - cell "user-config.json deleted or unreadable" [ref=e347]
+   992→          - row
+   993→            - cell "Streams low quality" [ref=e348]
+   994→            - cell "Adjust min quality preset or custom JSON" [ref=e349]
+   995→        - separator
+   996→        - generic
+   997→          - heading "🤝 Contributing" [level=2, ref=e250]
+   998→          - link "Permalink: 🤝 Contributing" [ref=e251]
+   999→        - paragraph
+  1000→        - list
+  1001→        - separator
+  1002→        - generic
+  1003→          - heading "❤️ Sponsorship" [level=2, ref=e252]
+  1004→          - link "Permalink: ❤️ Sponsorship" [ref=e253]
+  1005→        - paragraph
+  1006→        - paragraph
+  1007→          - link "Sponsor on GitHub" [ref=e254]
+  1008→        - paragraph
+  1009→        - separator
+  1010→        - generic
+  1011→          - heading "📜 License" [level=2, ref=e255]
+  1012→          - link "Permalink: 📜 License" [ref=e256]
+  1013→        - paragraph
+  1014→        - separator
+  1015→        - generic
+  1016→          - heading "🙏 Acknowledgements" [level=2, ref=e257]
+  1017→          - link "Permalink: 🙏 Acknowledgements" [ref=e258]
+  1018→    - heading "About" [level=2, ref=e39]
+  1019→    - heading "Topics" [level=3, ref=e40]
+  1020→    - link "4khdhub" [ref=e41]
+  1021→    - link "embed-reslover" [ref=e42]
+  1022→    - link "m3u8" [ref=e43]
+  1023→    - link "moviesmod" [ref=e44]
+  1024→    - link "mp4hydra" [ref=e45]
+  1025→    - link "showbox" [ref=e46]
+  1026→    - link "tmdb" [ref=e47]
+  1027→    - link "url-resolver" [ref=e48]
+  1028→    - link "vidsrc" [ref=e49]
+  1029→    - link "vidzee" [ref=e50]
+  1030→    - link "vixsrc" [ref=e51]
+  1031→    - link "xprime" [ref=e52]
+  1032→    - heading "Resources" [level=3, ref=e53]
+  1033→    - link "Readme" [ref=e88]
+  1034→    - link "MIT license" [ref=e89]
+  1035→    - link "Activity" [ref=e90]
+  1036→    - heading "Stars" [level=3, ref=e54]
+  1037→    - link "123 stars" [ref=e91]
+  1038→    - heading "Watchers" [level=3, ref=e55]
+  1039→    - link "7 watching" [ref=e92]
+  1040→    - heading "Forks" [level=3, ref=e56]
+  1041→    - link "121 forks" [ref=e93]
+  1042→    - link "Report repository" [ref=e94]
+  1043→    - heading "Releases" [level=2, ref=e57]
+  1044→    - heading "Packages" [level=2, ref=e58]
+  1045→    - heading "Used by" [level=2, ref=e59]
+  1046→    - heading "Contributors" [level=2, ref=e60]
+  1047→    - heading "Languages" [level=2, ref=e61]
+  1048→- contentinfo
+  1049→  - heading "Footer" [level=2, ref=e2]
+  1050→  - link "GitHub Homepage" [ref=e3]
+  1051→  - StaticText "© 2026 GitHub,Inc."
+  1052→  - navigation "Footer" [ref=e4]
+  1053→    - heading "Footer navigation" [level=3, ref=e8]
+  1054→    - list "Footer navigation"
+  1055→      - listitem [level=1]
+  1056→        - link "Terms" [ref=e14]
+  1057→      - listitem [level=1]
+  1058→        - link "Privacy" [ref=e15]
+  1059→      - listitem [level=1]
+  1060→        - link "Security" [ref=e16]
+  1061→      - listitem [level=1]
+  1062→        - link "Status" [ref=e17]
+  1063→      - listitem [level=1]
+  1064→        - link "Community" [ref=e18]
+  1065→      - listitem [level=1]
+  1066→        - link "Docs" [ref=e19]
+  1067→      - listitem [level=1]
+  1068→        - link "Contact" [ref=e20]
+  1069→      - listitem [level=1]
+  1070→        - button "Manage cookies" [ref=e62]
+  1071→      - listitem [level=1]
+  1072→        - button "Do not share my personal information" [ref=e63]
