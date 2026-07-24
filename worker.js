@@ -1,5 +1,13 @@
-// HyperStream Ultimate - Complete Stremio/Nuvio Streaming Addon
-// Version 6.0.0 - Full Catalog with Movies, Series, Anime & Adult Content
+// ═══════════════════════════════════════════════════════════════════════════════
+// HyperStream Ultimate - Professional Stremio/Nuvio Cloudflare Worker Addon
+// Version 8.0.0 - Static Catalogs with Real Content
+// 
+// Architecture:
+// - Movies/Series: Proxied from Cinemeta API (50k+ titles)
+// - Anime: Static catalog with 25+ popular anime
+// - Adult: Static catalog with 18+ premium entries
+// - Streams: Generated dynamically via Videasy/MegaPlay
+// ═══════════════════════════════════════════════════════════════════════════════
 
 export default {
   async fetch(request) {
@@ -7,733 +15,1070 @@ export default {
     const path = url.pathname;
     
     // CORS headers on EVERY response
-    const headers = {
+    const corsHeaders = {
       'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, OPTIONS',
       'Access-Control-Allow-Headers': '*',
       'Content-Type': 'application/json; charset=utf-8'
     };
 
+    // Handle preflight requests
     if (request.method === 'OPTIONS') {
-      return new Response(null, { status: 204, headers });
+      return new Response(null, { status: 204, headers: corsHeaders });
     }
 
     try {
-      // Manifest endpoint
+      // ─── MANIFEST ENDPOINT ─────────────────────────────────────────────
       if (path === '/' || path === '/manifest.json' || path === '') {
-        return new Response(JSON.stringify({
-          id: "com.dhrubonai.hyperstream",
-          version: "6.0.0",
-          name: "HyperStream Ultimate",
-          description: "🎬 Movies • 📺 Series • 🎌 Anime • 🔞 Adult - Ultimate Streaming Experience",
-          resources: ["catalog", "meta", "stream"],
-          types: ["movie", "series", "other"],
-          catalogs: [
-            { type: "movie", id: "movies", name: "🎬 Top Movies" },
-            { type: "series", id: "series", name: "📺 Top Series" },
-            { type: "other", id: "anime", name: "🎌 Anime" },
-            { type: "other", id: "adult", name: "🔞 Adult" }
-          ],
-          behaviorHints: { configurable: true, adult: false }
-        }), { headers });
+        return handleManifest(corsHeaders);
       }
 
-      // Catalog requests
+      // ─── CATALOG ENDPOINT (/catalog/{type}/{id}.json?skip=n) ──────────
       if (path.includes('/catalog/')) {
-        return handleCatalog(path, headers);
+        return await handleCatalog(url, path, corsHeaders);
       }
 
-      // Meta requests  
+      // ─── META ENDPOINT (/meta/{type}/{id}.json) ───────────────────────
       if (path.includes('/meta/')) {
-        return handleMeta(path, headers);
+        return await handleMeta(path, corsHeaders);
       }
 
-      // Stream requests
+      // ─── STREAM ENDPOINT (/stream/{type}/{id}.json) ───────────────────
       if (path.includes('/stream/')) {
-        return handleStream(path, headers);
+        return await handleStream(path, corsHeaders);
       }
 
-      // Fallback
-      return new Response(JSON.stringify({ 
-        error: 'Not Found', 
-        path: path,
-        hint: 'Use /manifest.json to get started'
-      }), { status: 404, headers });
+      // Default 404
+      return new Response(JSON.stringify({ error: 'Not Found' }), { 
+        status: 404, 
+        headers: corsHeaders 
+      });
 
     } catch (error) {
-      return new Response(JSON.stringify({ error: error.message }), { status: 500, headers });
+      return new Response(JSON.stringify({ 
+        error: 'Internal Server Error', 
+        message: error.message 
+      }), { 
+        status: 500, 
+        headers: corsHeaders 
+      });
     }
   }
 };
 
-// ==================== MOVIES CATALOG (50+) ====================
-const moviesCatalog = [
-  { id: "tt4154796", type: "movie", name: "Avengers: Endgame", poster: "https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg", description: "After the devastating events of Infinity War, the universe is in ruins. With the help of remaining allies, the Avengers assemble once more to reverse Thanos' actions and restore balance to the universe.", releaseInfo: "2019", imdbRating: "8.4", genres: ["Action", "Adventure", "Drama"] },
-  { id: "tt15398776", type: "movie", name: "Oppenheimer", poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg", description: "The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb during World War II.", releaseInfo: "2023", imdbRating: "8.6", genres: ["Biography", "Drama", "History"] },
-  { id: "tt3624082", type: "movie", name: "Top Gun: Maverick", poster: "https://image.tmdb.org/t/p/w500/62HCnUTziyWcpDaBO2i1DX17ljH.jpg", description: "After thirty years, Maverick is still pushing the envelope as a top naval aviator, but must confront ghosts of his past when he leads TOP GUN's elite graduates on a mission that demands the ultimate sacrifice.", releaseInfo: "2022", imdbRating: "8.3", genres: ["Action", "Drama"] },
-  { id: "tt10872600", type: "movie", name: "Spider-Man: No Way Home", poster: "https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg", description: "With Spider-Man's identity now revealed, Peter asks Doctor Strange for help. When a spell goes wrong, dangerous foes from other worlds start to appear, forcing Peter to discover what it truly means to be Spider-Man.", releaseInfo: "2021", imdbRating: "8.2", genres: ["Action", "Adventure", "Fantasy"] },
-  { id: "tt1877830", type: "movie", name: "The Batman", poster: "https://image.tmdb.org/t/p/w500/74xTEgt7R36Fpooo50r9T25onhq.jpg", description: "When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate the city's hidden corruption and question his family's involvement.", releaseInfo: "2022", imdbRating: "7.8", genres: ["Action", "Crime", "Drama"] },
-  { id: "tt0468569", type: "movie", name: "The Dark Knight", poster: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg", description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological tests of his ability to fight injustice.", releaseInfo: "2008", imdbRating: "9.0", genres: ["Action", "Crime", "Drama"] },
-  { id: "tt1375666", type: "movie", name: "Inception", poster: "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg", description: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O., but his tragic past may doom the project.", releaseInfo: "2010", imdbRating: "8.8", genres: ["Action", "Adventure", "Sci-Fi"] },
-  { id: "tt1517268", type: "movie", name: "The Shawshank Redemption", poster: "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg", description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.", releaseInfo: "1994", imdbRating: "9.3", genres: ["Drama"] },
-  { id: "tt0816692", type: "movie", name: "Avatar: The Way of Water", poster: "https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg", description: "Jake Sully lives with his newfound family formed on the extrasolar moon Pandora. Once a familiar threat returns to finish what was previously started, Jake must work with Neytiri and the army of the Na'vi race to protect their home.", releaseInfo: "2022", imdbRating: "7.7", genres: ["Action", "Adventure", "Fantasy"] },
-  { id: "tt0109830", type: "movie", name: "Forrest Gump", poster: "https://image.tmdb.org/t/p/w500/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg", description: "The presidencies of Kennedy and Johnson, the Vietnam War, the Watergate scandal and other historical events unfold from the perspective of an Alabama man with an IQ of 75.", releaseInfo: "1994", imdbRating: "8.8", genres: ["Drama", "Romance"] },
-  { id: "tt10366206", type: "movie", name: "Everything Everywhere All at Once", poster: "https://image.tmdb.org/t/p/w500/w3LxiVYdWWRvEVdn5RYq6jIqkb1.jpg", description: "A middle-aged Chinese immigrant is swept up into an insane adventure where she alone can save existence by exploring other universes connecting with the lives she could have led.", releaseInfo: "2022", imdbRating: "7.9", genres: ["Action", "Adventure", "Comedy"] },
-  { id: "tt0499549", type: "movie", name: "Avatar", poster: "https://image.tmdb.org/t/p/w500/jRXYjXNq0Cs2TcJjLkki24MLp7u.jpg", description: "A paraplegic Marine dispatched to the moon Pandora on a unique mission becomes torn between following his orders and protecting the world he feels is his home.", releaseInfo: "2009", imdbRating: "7.9", genres: ["Action", "Adventure", "Fantasy"] },
-  { id: "tt0266543", type: "movie", name: "The Lord of the Rings: The Fellowship of the Ring", poster: "https://image.tmdb.org/t/p/w500/6oom5QYQ2yQTMJIbn8bkCmmrflg.jpg", description: "A meek Hobbit from the Shire and eight companions set out on a journey to destroy the powerful One Ring and save Middle-earth from the Dark Lord Sauron.", releaseInfo: "2001", imdbRating: "8.9", genres: ["Action", "Adventure", "Drama"] },
-  { id: "tt1856101", type: "movie", name: "Jurassic World", poster: "https://image.tmdb.org/t/p/w500/uJYYizSuA9Y3DCs0qS4qWvHfZg4.jpg", description: "A new theme park, built on the original site of Jurassic Park, creates a genetically modified hybrid dinosaur, which escapes containment and goes on a killing spree.", releaseInfo: "2015", imdbRating: "6.6", genres: ["Action", "Adventure", "Sci-Fi"] },
-  { id: "tt1160419", type: "movie", name: "Dune: Part Two", poster: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjMVAO.jpg", description: "Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family. Facing a choice between love and fate, he must prevent a terrible future only he can foresee.", releaseInfo: "2024", imdbRating: "8.5", genres: ["Action", "Adventure", "Drama"] },
-  { id: "tt0095950", type: "movie", name: "Indiana Jones and the Last Crusade", poster: "https://image.tmdb.org/t/p/w500/efrZOCw5hvpEhPdSNv6Mgw4DBl.jpg", description: "Archaeologist and adventurer Indiana Jones joins forces with his father to stop Nazis from obtaining the Holy Grail.", releaseInfo: "1989", imdbRating: "8.3", genres: ["Action", "Adventure"] },
-  { id: "tt0120737", type: "movie", name: "The Lord of the Rings: The Fellowship of the Ring", poster: "https://image.tmdb.org/t/p/w500/6oom5QYQ2yQTMJIbn8bkCmmrflg.jpg", description: "A Hobbit named Frodo inherits a ring that holds the key to the survival of all Middle-earth. He must destroy it in the fires of Mount Doom before the Dark Lord Sauron finds it.", releaseInfo: "2001", imdbRating: "8.9", genres: ["Action", "Adventure", "Fantasy"] },
-  { id: "tt0068646", type: "movie", name: "The Godfather", poster: "https://image.tmdb.org/t/p/w500/3bhkrj58Vtu7enYsRolD1fZdja1.jpg", description: "The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant youngest son.", releaseInfo: "1972", imdbRating: "9.2", genres: ["Crime", "Drama"] },
-  { id: "tt0111161", type: "movie", name: "The Shawshank Redemption", poster: "https://image.tmdb.org/t/p/w500/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg", description: "Andy Dufresne, a banker, is sentenced to life in Shawshank State Penitentiary for the murder of his wife and her lover, despite his claims of innocence.", releaseInfo: "1994", imdbRating: "9.3", genres: ["Drama"] },
-  { id: "tt2380330", type: "movie", name: "Interstellar", poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg", description: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival as Earth becomes uninhabitable.", releaseInfo: "2014", imdbRating: "8.7", genres: ["Adventure", "Drama", "Sci-Fi"] },
-  { id: "tt2975590", type: "movie", name: "Captain America: Civil War", poster: "https://image.tmdb.org/t/p/w500/rAGiNaa0iCmW8lWSOJXiUobJ0eG.jpg", description: "Political involvement in the Avengers' activities causes a rift between Captain America and Iron Man, leading to an internal battle between the heroes.", releaseInfo: "2016", imdbRating: "7.8", genres: ["Action", "Adventure", "Sci-Fi"] },
-  { id: "tt1825683", type: "movie", name: "The Hunger Games: Catching Fire", poster: "https://image.tmdb.org/t/p/w500/nPszQSxgGMKpcMM5T9fHWZoeT73.jpg", description: "Katniss Everdeen and Peeta Mellark become targets of the Capitol after their victory in the 74th Hunger Games sparks a rebellion in the Districts of Panem.", releaseInfo: "2013", imdbRating: "7.5", genres: ["Action", "Adventure", "Sci-Fi"] },
-  { id: "tt4633694", type: "movie", name: "Spider-Man: Into the Spider-Verse", poster: "https://image.tmdb.org/t/p/w500/iiZZdoQBEYBv6id8su7ImL0oCbD.jpg", description: "Teen Miles Morales becomes the Spider-Man of his universe, and must join with five spider-powered individuals from other dimensions to stop a threat for all realities.", releaseInfo: "2018", imdbRating: "8.4", genres: ["Animation", "Action", "Adventure"] },
-  { id: "tt3743324", type: "movie", name: "Black Panther", poster: "https://image.tmdb.org/t/p/w500/uxzzxijgPIY7slzFvMotPv8wjKA.jpg", description: "T'Challa, heir to the hidden but advanced kingdom of Wakanda, must step forward to lead his people into a new future and must confront a challenger from his country's past.", releaseInfo: "2018", imdbRating: "7.3", genres: ["Action", "Adventure", "Sci-Fi"] },
-  { id: "tt11196316", type: "movie", name: "John Wick: Chapter 4", poster: "https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5Uqs0v33.jpg", description: "John Wick uncovers a path to defeating The High Table. But before he can earn his freedom, Wick must face off against a new enemy with powerful alliances across the globe.", releaseInfo: "2023", imdbRating: "7.7", genres: ["Action", "Crime", "Thriller"] },
-  { id: "tt11240732", type: "movie", name: "Deadpool & Wolverine", poster: "https://image.tmdb.org/t/p/w500/8cdWjvZQUExUUTzyp4t6EDMubfO.jpg", description: "Wolverine is recovering from his injuries when he crosses paths with the loudmouth Deadpool. They form a duo and must defeat a common enemy.", releaseInfo: "2024", imdbRating: "7.9", genres: ["Action", "Adventure", "Comedy"] },
-  { id: "tt0050083", type: "movie", name: "Psycho", poster: "https://image.tmdb.org/t/p/w500/揣bSLqONnMLo6eH3fnSBubxdDF.jpg", description: "A Phoenix secretary embezzles $40,000 from her employer's client, goes on the run, and checks into a remote motel run by a young man under the domination of his mother.", releaseInfo: "1960", imdbRating: "8.5", genres: ["Horror", "Mystery", "Thriller"] },
-  { id: "tt0073486", type: "movie", name: "Jaws", poster: "https://image.tmdb.org/t/p/w500/sqMlw7XOgljJzL1PWvwHoi87Jss.jpg", description: "A great white shark hunts swimmers off Amity Island, prompting the police chief, a marine biologist, and a fisherman to hunt it down.", releaseInfo: "1975", imdbRating: "8.1", genres: ["Adventure", "Thriller"] },
-  { id: "tt0080678", type: "movie", name: "Raiders of the Lost Ark", poster: "https://image.tmdb.org/t/p/w500/AaV1YIdWKhw9f0fJhMoZVGfucTH.jpg", description: "Archaeologist Indiana Jones races against Nazi Germany to recover the lost Ark of the Covenant before Hitler's army can use its power to conquer the world.", releaseInfo: "1981", imdbRating: "8.4", genres: ["Action", "Adventure"] },
-  { id: "tt0097576", type: "movie", name: "Aliens", poster: "https://image.tmdb.org/t/p/w500/iuFXMSl2lTmcVyJVOkqkQKXvEfv.jpg", description: "Ellen Ripley returns to the moon where her crew encountered the hostile Alien creature, this time accompanied by colonial marines who intend to wipe out the alien threat forever.", releaseInfo: "1986", imdbRating: "8.4", genres: ["Action", "Horror", "Sci-Fi"] },
-  { id: "tt0108052", type: "movie", name: "Schindler's List", poster: "https://image.tmdb.org/t/p/w500/sF1U4EUQS8YHUYjNl3pMG49QSm1.jpg", description: "In German-occupied Poland during World War II, industrialist Oskar Schindler gradually becomes concerned for his Jewish workforce after witnessing their persecution by the Nazis.", releaseInfo: "1993", imdbRating: "9.0", genres: ["Biography", "Drama", "History"] },
-  { id: "tt0110912", type: "movie", name: "Pulp Fiction", poster: "https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg", description: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.", releaseInfo: "1994", imdbRating: "8.9", genres: ["Crime", "Drama"] },
-  { id: "tt0120689", type: "movie", name: "The Green Mile", poster: "https://image.tmdb.org/t/p/w500/velNPhGQmDmTWlhjRnmVtYz3gEX.jpg", description: "The lives of guards on Death Row are affected by one of their charges, a black man accused of child murder and rape, while having a mysterious gift.", releaseInfo: "1999", imdbRating: "8.6", genres: ["Crime", "Drama", "Fantasy"] },
-  { id: "tt0134826", type: "movie", name: "Fight Club", poster: "https://image.tmdb.org/t/p/w500/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg", description: "An insomniac office worker and a devil-may-care soap maker form an underground fight club that evolves into much more.", releaseInfo: "1999", imdbRating: "8.8", genres: ["Drama"] },
-  { id: "tt0162221", type: "movie", name: "The Lord of the Rings: The Two Towers", poster: "https://image.tmdb.org/t/p/w500/V7drxZjghsBmZaXEM2PmqHFGX9v.jpg", description: "While Frodo and Sam continue their journey towards Mordor, Aragorn, Legolas, and Gimli come to the war-torn nation of Rohan and reunite with Gandalf to fight the evil wizard Saruman's army.", releaseInfo: "2002", imdbRating: "8.8", genres: ["Action", "Adventure", "Drama"] },
-  { id: "tt0172495", type: "movie", name: "Gladiator", poster: "https://image.tmdb.org/t/p/w500/ty8TGRuvJLPUmAR1H1nRIsgwvim.jpg", description: "A former Roman General sets out to exact vengeance against the corrupt emperor who murdered his family and sent him into slavery.", releaseInfo: "2000", imdbRating: "8.5", genres: ["Action", "Adventure", "Drama"] },
-  { id: "tt0180093", type: "movie", name: "The Lord of the Rings: The Return of the King", poster: "https://image.tmdb.org/t/p/w500/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg", description: "Gandalf and Aragorn lead the World of Men against Sauron's army to draw his gaze from Frodo and Sam as they approach Mount Doom with the One Ring.", releaseInfo: "2003", imdbRating: "9.0", genres: ["Action", "Adventure", "Drama"] },
-  { id: "tt0209145", type: "movie", name: "Master and Commander: The Far Side of the World", poster: "https://image.tmdb.org/t/p/w500/mB5zqW4hEitI8fKrjJOLxMinbSx.jpg", description: "During the Napoleonic Wars, a brash British captain pushes his ship and crew to their limits in pursuit of a formidable French war vessel around South America.", releaseInfo: "2003", imdbRating: "7.4", genres: ["Action", "Adventure", "Drama"] },
-  { id: "tt0241527", type: "movie", name: "Harry Potter and the Sorcerer's Stone", poster: "https://image.tmdb.org/t/p/w500/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg", description: "An orphaned boy enrolls in a school of wizardry, where he learns the truth about himself, his family and the terrible evil that haunts the magical world.", releaseInfo: "2001", imdbRating: "7.6", genres: ["Adventure", "Family", "Fantasy"] },
-  { id: "tt0253474", type: "movie", name: "The Lord of the Rings: The Fellowship of the Ring Extended", poster: "https://image.tmdb.org/t/p/w500/6oom5QYQ2yQTMJIbn8bkCmmrflg.jpg", description: "Extended edition of the epic tale of a humble hobbit who is entrusted with the task of destroying the One Ring before the Dark Lord can reclaim it.", releaseInfo: "2001", imdbRating: "9.0", genres: ["Action", "Adventure", "Fantasy"] },
-  { id: "tt0286741", type: "movie", name: "Harry Potter and the Chamber of Secrets", poster: "https://image.tmdb.org/t/p/w500/lbDxn6g5MJqMZukz1P3w2WTLW7e.jpg", description: "An ancient prophecy seems to be coming true when a mysterious presence begins stalking the corridors of Hogwarts and leaving its victims paralyzed.", releaseInfo: "2002", imdbRating: "7.4", genres: ["Adventure", "Family", "Fantasy"] },
-  { id: "tt0317940", type: "movie", name: "Pirates of the Caribbean: The Curse of the Black Pearl", poster: "https://image.tmdb.org/t/p/w500/qrEMmqlWHv4hOOPcqSjxzJPqSMI.jpg", description: "Blacksmith Will Turner teams up with eccentric pirate Captain Jack Sparrow to save his love, the governor's daughter, from Jack's former pirate allies, who are now undead.", releaseInfo: "2003", imdbRating: "8.1", genres: ["Action", "Adventure", "Fantasy"] },
-  { id: "tt0369610", type: "movie", name: "Jurassic World: Fallen Kingdom", poster: "https://image.tmdb.org/t/p/w500/cCFsY6hGQcLHN9eWQVKiVaUZNh.jpg", description: "When the island's dormant volcano begins roaring to life, Owen and Claire mount a campaign to rescue the remaining dinosaurs from this extinction-level event.", releaseInfo: "2018", imdbRating: "5.7", genres: ["Action", "Adventure", "Sci-Fi"] },
-  { id: "tt0485974", type: "movie", name: "The Bourne Ultimatum", poster: "https://image.tmdb.org/t/p/w500/aq1MisSPoUmJBduljk68JqliHrk.jpg", description: "Jason Bourne continues his international quest for answers about his past, while being hunted by the very organization that made him who he is.", releaseInfo: "2007", imdbRating: "8.0", genres: ["Action", "Thriller"] },
-  { id: "tt0848228", type: "movie", name: "Avengers: Age of Ultron", poster: "https://image.tmdb.org/t/p/w500/4ss3wY8DmfxJu0G1UEUhCq7rJWM.jpg", description: "When Tony Stark and Bruce Banner try to jump-start a dormant peacekeeping program called Ultron, things go horribly wrong and it's up to Earth's mightiest heroes to stop the villainous Ultron from enacting his terrible plan.", releaseInfo: "2015", imdbRating: "7.3", genres: ["Action", "Adventure", "Sci-Fi"] },
-  { id: "tt0993842", type: "movie", name: "The Dark Knight Rises", poster: "https://image.tmdb.org/t/p/w500/K9uZyI9XI8wt6gnWjRvTNUI5test.jpg", description: "Eight years after the Joker's reign of terrorism, Batman, with the help of the enigmatic Catwoman, is forced from his exile to save Gotham City from the brutal guerrilla terrorist Bane.", releaseInfo: "2012", imdbRating: "8.4", genres: ["Action", "Crime", "Drama"] },
-  { id: "tt1201607", type: "movie", name: "Harry Potter and the Deathly Hallows: Part 2", poster: "https://image.tmdb.org/t/p/w500/hZSmC3LKVbKsAzZ68cjqBfDoDug.jpg", description: "Harry, Ron, and Hermione search for Voldemort's remaining Horcruxes in their effort to destroy the Dark Lord once and for all as the ultimate battle rages on at Hogwarts.", releaseInfo: "2011", imdbRating: "8.1", genres: ["Adventure", "Drama", "Fantasy"] },
-  { id: "tt1270797", type: "movie", name: "The Social Network", poster: "https://image.tmdb.org/t/p/w500/n0yLIBiidMnX8mN7dhd5wkg02VQ.jpg", description: "Harvard student Mark Zuckerberg creates the social networking site that would become known as Facebook, but is later sued by two brothers who claimed he stole their idea.", releaseInfo: "2010", imdbRating: "7.7", genres: ["Biography", "Drama"] },
-  { id: "tt1630029", type: "movie", name: "Avatar: Extended Collector's Edition", poster: "https://image.tmdb.org/t/p/w500/jRXYjXNq0Cs2TcJjLkki24MLp7u.jpg", description: "Extended version of James Cameron's groundbreaking sci-fi epic about a paraplegic marine dispatched to Pandora who falls in love with the Na'vi way of life.", releaseInfo: "2009", imdbRating: "7.9", genres: ["Action", "Adventure", "Fantasy"] },
-  { id: "tt1825683", type: "movie", name: "The Hunger Games: Catching Fire", poster: "https://image.tmdb.org/t/p/w500/nPszQSxgGMKpcMM5T9fHWZoeT73.jpg", description: "Katniss Everdeen and Peeta Mellark become targets of the Capitol after their victory sparks a rebellion in Panem's districts.", releaseInfo: "2013", imdbRating: "7.5", genres: ["Action", "Adventure", "Sci-Fi"] },
-  { id: "tt2398429", type: "movie", name: "Godzilla", poster: "https://image.tmdb.org/t/p/w500/ojh2vz5k2EWL9PHqABaekVvIXYL.jpg", description: "The world's most fearsome creatures rise again after millennia to fight for supremacy, leaving humanity's existence hanging in the balance.", releaseInfo: "2014", imdbRating: "6.4", genres: ["Action", "Adventure", "Sci-Fi"] },
-  { id: "tt3501632", type: "movie", name: "Thor: Ragnarok", poster: "https://image.tmdb.org/t/p/w500/kaIf55hlUecUcj2lF0lC9q0iJNj.jpg", description: "Imprisoned on the planet Sakaar, Thor must race against time to return to Asgard and stop Ragnarok, the destruction of his homeworld, at the hands of the all-powerful Hela.", releaseInfo: "2017", imdbRating: "7.9", genres: ["Action", "Adventure", "Comedy"] },
-  { id: "tt3749900", type: "movie", name: "Doctor Strange", poster: "https://image.tmdb.org/t/p/w500/tFEU8bDeYrGaJbPNStClZDwGVGA.jpg", description: "While on a journey of physical and healing, brilliant neurosurgeon Doctor Stephen Strange learns the secrets of a hidden world of magic and alternate dimensions.", releaseInfo: "2016", imdbRating: "7.5", genres: ["Action", "Adventure", "Fantasy"] },
-  { id: "tt4154756", type: "movie", name: "Avengers: Infinity War", poster: "https://image.tmdb.org/t/p/w500/7WsyChQLEftFiDOVTGkvU4AevfO.jpg", description: "The Avengers and their allies must be willing to sacrifice all in an attempt to defeat the powerful Thanos before his blitz of devastation and ruin puts an end to the universe.", releaseInfo: "2018", imdbRating: "8.4", genres: ["Action", "Adventure", "Sci-Fi"] },
-  { id: "tt5050054", type: "movie", name: "Justice League", poster: "https://image.tmdb.org/t/p/w500/cKep7lqDiHZkJ0SJsRR1ipz5qv7.jpg", description: "Inspired by Superman's sacrifice, Bruce Wayne and Diana Prince set out to recruit a team of metahumans to protect the world from an approaching threat of catastrophic proportions.", releaseInfo: "2017", imdbRating: "6.0", genres: ["Action", "Adventure", "Fantasy"] },
-  { id: "tt5463162", type: "movie", name: "Deadpool", poster: "https://image.tmdb.org/t/p/w500/fSRbJKcyUXagew5r01MBWo87R7Q.jpg", description: "A wisecracking mercenary gets experimented on and becomes immortal yet hideously scarred, setting out to track down the man who ruined his looks.", releaseInfo: "2016", imdbRating: "8.0", genres: ["Action", "Adventure", "Comedy"] },
-  { id: "tt6789794", type: "movie", name: "Glass", poster: "https://image.tmdb.org/t/p/w500/vIHlsWtleEmWqODtQiHqprVVwE.jpg", description: "Security guard David Dunn uses his supernatural abilities to track Kevin Wendell Crumb, a disturbed man who has twenty-four personalities.", releaseInfo: "2019", imdbRating: "6.7", genres: ["Drama", "Sci-Fi", "Thriller"] },
-  { id: "tt7131872", type: "movie", name: "Joker", poster: "https://image.tmdb.org/t/p/w500/udDclJoHjfjb8Ekgsd4FDteOkCU.jpg", description: "In Gotham City, mentally troubled comedian Arthur Fleck is disregarded and mistreated by society. He then embarks on a downward spiral of revolution and bloody crime.", releaseInfo: "2019", imdbRating: "8.4", genres: ["Crime", "Drama", "Thriller"] },
-  { id: "tt8946368", type: "movie", name: "A Quiet Place", poster: "https://image.tmdb.org/t/p/w500/nnUHB1cmkQC5gA29LsjPJNOygOc.jpg", description: "In a post-apocalyptic world, a family is forced to live in silence while hiding from monsters with ultra-sensitive hearing.", releaseInfo: "2018", imdbRating: "7.5", genres: ["Drama", "Horror", "Sci-Fi"] },
-  { id: "tt9419884", type: "movie", name: "Tenet", poster: "https://image.tmdb.org/t/p/w500/k68nPLWISTBlOTVRANZmYnjQEvE.jpg", description: "Armed with only one word, Tenet, and fighting for the survival of the entire world, a Protagonist journeys through a twilight world of international espionage on a mission that will unfold in something beyond real time.", releaseInfo: "2020", imdbRating: "7.3", genres: ["Action", "Sci-Fi", "Thriller"] }
-];
-
-// ==================== SERIES CATALOG (30+) ====================
-const seriesCatalog = [
-  { 
-    id: "tt0944947", type: "series", name: "Game of Thrones", 
-    poster: "https://image.tmdb.org/t/p/w500/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg", 
-    description: "Seven noble families fight for control of the mythical land of Westeros. Friction between the houses leads to full-scale war while an ancient enemy returns after being dormant for millennia.",
-    releaseInfo: "2011–2019", imdbRating: "9.2", genres: ["Action", "Adventure", "Drama"],
-    videos: generateSeriesVideos("tt0944947", 8, 10)
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATIC ANIME CATALOG DATA (25 Popular Anime)
+// ═══════════════════════════════════════════════════════════════════════════════
+const ANIME_CATALOG = [
+  {
+    id: "anime_1",
+    type: "other",
+    name: "Attack on Titan",
+    poster: "https://cdn.myanimelist.net/images/anime/10/47347l.jpg",
+    description: "Centuries ago, mankind was slaughtered to near extinction by monstrous humanoid creatures called Titans, forcing humans to hide in fear behind enormous concentric walls. What makes these giants truly terrifying is that their taste for human flesh is not born out of hunger but what appears to be out of pleasure. To ensure their survival, the remnants of humanity began living within defensive barriers, resulting in one hundred years without a single titan encounter.",
+    genres: ["Anime", "Action", "Drama", "Fantasy"],
+    releaseInfo: "2013–2023",
+    imdbRating: "9.0",
+    videos: Array.from({ length: 87 }, (_, i) => ({ id: `anime_1:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt0903747", type: "series", name: "Breaking Bad", 
-    poster: "https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg", 
-    description: "A high school chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine in order to secure his family's financial future.",
-    releaseInfo: "2008–2013", imdbRating: "9.5", genres: ["Crime", "Drama", "Thriller"],
-    videos: generateSeriesVideos("tt0903747", 5, 13)
+  {
+    id: "anime_2",
+    type: "other",
+    name: "Demon Slayer: Kimetsu no Yaiba",
+    poster: "https://cdn.myanimelist.net/images/anime/1286/99889l.jpg",
+    description: "Ever since the death of his father, the burden of supporting the family has fallen upon Tanjirou Kamado's shoulders. Though living impoverished on a remote mountain, the Kamado family are able to enjoy a relatively peaceful and happy life. One day, Tanjirou decides to go down to the local village to make a little money selling charcoal. On his way back, night falls, forcing Tanjirou to take shelter in the house of a strange man, who warns him of the existence of flesh-eating demons that lurk in the woods at night.",
+    genres: ["Anime", "Action", "Supernatural"],
+    releaseInfo: "2019–2024",
+    imdbRating: "8.6",
+    videos: Array.from({ length: 44 }, (_, i) => ({ id: `anime_2:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt4574234", type: "series", name: "Stranger Things", 
-    poster: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg", 
-    description: "When a young boy disappears, his mother, a police chief, and his friends must confront terrifying supernatural forces in order to get him back.",
-    releaseInfo: "2016–", imdbRating: "8.7", genres: ["Drama", "Fantasy", "Horror"],
-    videos: generateSeriesVideos("tt4574234", 4, 9)
+  {
+    id: "anime_3",
+    type: "other",
+    name: "Jujutsu Kaisen",
+    poster: "https://cdn.myanimelist.net/images/anime/1171/109222l.jpg",
+    description: "Idly indulging in baseless paranormal activities with the Occult Club, high schooler Yuuji Itadori spends his days at either the clubroom or the hospital, where he visits his bedridden grandfather. However, this leisurely lifestyle soon takes a turn for the strange when he unknowingly encounters a cursed item. Triggering a chain of supernatural occurrences, Yuuji finds himself suddenly thrust into the world of Curses.",
+    genres: ["Anime", "Action", "Supernatural"],
+    releaseInfo: "2020–Present",
+    imdbRating: "8.7",
+    videos: Array.from({ length: 47 }, (_, i) => ({ id: `anime_3:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt3581920", type: "series", name: "The Last of Us", 
-    poster: "https://image.tmdb.org/t/p/w500/uKvVj3q4ZN4LYcPkeT1Cya14WSL.jpg", 
-    description: "Joel and Ellie, a pair connected through the harshness of the world they live in, are forced to endure brutal circumstances and ruthless killers on a trek across post-apocalyptic America.",
-    releaseInfo: "2023–", imdbRating: "8.8", genres: ["Action", "Adventure", "Drama"],
-    videos: generateSeriesVideos("tt3581920", 2, 9)
+  {
+    id: "anime_4",
+    type: "other",
+    name: "One Piece",
+    poster: "https://cdn.myanimelist.net/images/anime/6/73245l.jpg",
+    description: "Gol D. Roger was known as the 'Pirate King,' the strongest and most infamous being to have sailed the Grand Line. The capture and execution of Roger by the World Government brought a change throughout the world. His last words before his death revealed the existence of the greatest treasure in the world, One Piece. It was this revelation that brought about the Grand Age of Pirates, men who dreamed of finding One Piece—which promises an unlimited amount of fame and fortune—and quite possibly the pinnacle of glory.",
+    genres: ["Anime", "Action", "Adventure", "Comedy"],
+    releaseInfo: "1999–Present",
+    imdbRating: "8.9",
+    videos: Array.from({ length: 100 }, (_, i) => ({ id: `anime_4:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt1190634", type: "series", name: "The Boys", 
-    poster: "https://image.tmdb.org/t/p/w500/mY7SeH4HFFxW1hiI6cWuwCRKptN.jpg", 
-    description: "A group of vigilantes set out to take down corrupt superheroes who abuse their superpowers rather than using them for good.",
-    releaseInfo: "2019–", imdbRating: "8.7", genres: ["Action", "Comedy", "Crime"],
-    videos: generateSeriesVideos("tt1190634", 4, 8)
+  {
+    id: "anime_5",
+    type: "other",
+    name: "Naruto Shippuden",
+    poster: "https://cdn.myanimelist.net/images/anime/5/17407l.jpg",
+    description: "It has been two and a half years since Naruto Uzumaki left Konohagakure, the Hidden Leaf Village, for intense training following events which fueled his desire to be stronger. Now Akatsuki, the mysterious organization of elite rogue ninja, is closing in on their grand plan which may threaten the safety of the entire shinobi world.",
+    genres: ["Anime", "Action", "Adventure"],
+    releaseInfo: "2007–2017",
+    imdbRating: "8.6",
+    videos: Array.from({ length: 500 }, (_, i) => ({ id: `anime_5:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt13457460", type: "series", name: "Wednesday", 
-    poster: "https://image.tmdb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg", 
-    description: "Follows Wednesday Addams' years as a student at Nevermore Academy where she attempts to master her emerging psychic ability.",
-    releaseInfo: "2022–", imdbRating: "8.5", genres: ["Comedy", "Crime", "Fantasy"],
-    videos: generateSeriesVideos("tt13457460", 2, 8)
+  {
+    id: "anime_6",
+    type: "other",
+    name: "Death Note",
+    poster: "https://cdn.myanimelist.net/images/anime/9/9453l.jpg",
+    description: "A shinigami, as a god of death, can kill any person—provided they see their victim's face and write their victim's name in a notebook called a Death Note. One day, Ryuk, bored by the shinigami lifestyle and interested in seeing how a human would use a Death Note, drops one into the human realm. High school student and prodigy Light Yagami stumbles upon the Death Note and tests it by writing a criminal's name in it.",
+    genres: ["Anime", "Thriller", "Supernatural"],
+    releaseInfo: "2006–2007",
+    imdbRating: "9.0",
+    videos: Array.from({ length: 37 }, (_, i) => ({ id: `anime_6:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt10554269", type: "series", name: "The Witcher", 
-    poster: "https://image.tmdb.org/t/p/w500/7vjaCdMw15FEbXyLQTVa04URsPm.jpg", 
-    description: "Geralt of Rivia, a solitary monster hunter, struggles to find his place in a world where people often prove more wicked than beasts.",
-    releaseInfo: "2019–", imdbRating: "8.0", genres: ["Action", "Adventure", "Fantasy"],
-    videos: generateSeriesVideos("tt10554269", 3, 8)
+  {
+    id: "anime_7",
+    type: "other",
+    name: "My Hero Academia",
+    poster: "https://cdn.myanimelist.net/images/anime/10/78745l.jpg",
+    description: "The appearance of 'quirks,' newly discovered super powers, has been steadily increasing over the years, with 80 percent of humanity possessing various abilities from manipulation of elements to shapeshifting. This leaves the remainder of the world completely powerless, and Izuku Midoriya is one such individual. Since he was a child, the ambitious middle schooler has wanted nothing more than to be a hero.",
+    genres: ["Anime", "Action", "Comedy"],
+    releaseInfo: "2016–Present",
+    imdbRating: "8.0",
+    videos: Array.from({ length: 138 }, (_, i) => ({ id: `anime_7:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt11198330", type: "series", name: "House of the Dragon", 
-    poster: "https://image.tmdb.org/t/p/w500/z2yahl2uefxD1BkrnRNa6R5BodK.jpg", 
-    description: "An internal war is fought, known as the Dance of the Dragons, for control of the Iron Throne between House Targaryen branches.",
-    releaseInfo: "2022–", imdbRating: "8.5", genres: ["Action", "Adventure", "Drama"],
-    videos: generateSeriesVideos("tt11198330", 2, 10)
+  {
+    id: "anime_8",
+    type: "other",
+    name: "Dragon Ball Super",
+    poster: "https://cdn.myanimelist.net/images/anime/12/87737l.jpg",
+    description: "With Majin Buu now defeated and Earth at peace, the heroes have settled into normal lives, which in Goku's case means being a radish farmer. Their peace is soon broken with the arrival of Beerus, the God of Destruction. Seeking a worthy opponent, Beerus learns of a Saiyan named Goku who defeated Frieza. Now wanting to test Goku's power, Beerus heads towards Earth.",
+    genres: ["Anime", "Action", "Adventure"],
+    releaseInfo: "2015–2018",
+    imdbRating: "7.8",
+    videos: Array.from({ length: 131 }, (_, i) => ({ id: `anime_8:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt3029516", type: "series", name: "Better Call Saul", 
-    poster: "https://image.tmdb.org/t/p/w500/eBctNaeiUqQBao5IK7yGlrWNyFfy.jpg", 
-    description: "The trials and tribulations of criminal lawyer Jimmy McGill before he became Saul Goodman.",
-    releaseInfo: "2015–2022", imdbRating: "8.9", genres: ["Crime", "Drama"],
-    videos: generateSeriesVideos("tt3029516", 6, 10)
+  {
+    id: "anime_9",
+    type: "other",
+    name: "Fullmetal Alchemist: Brotherhood",
+    poster: "https://cdn.myanimelist.net/images/anime/1209/94577l.jpg",
+    description: "After a horrific alchemy experiment goes wrong in the Elric household, brothers Edward and Alphonse are left in a catastrophic new reality. Ignoring the alchemical principle banning human transmutation, the boys attempted to bring their recently deceased mother back to life. Instead, they suffered brutal personal loss: Alphonse's entire body and Edward's left leg. In a desperate sacrifice, Edward uses his right arm as payment to seal Alphonse's soul into a suit of armor.",
+    genres: ["Anime", "Action", "Adventure", "Drama"],
+    releaseInfo: "2009–2010",
+    imdbRating: "9.1",
+    videos: Array.from({ length: 64 }, (_, i) => ({ id: `anime_9:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt7183020", type: "series", name: "The Mandalorian", 
-    poster: "https://image.tmdb.org/t/p/w500/sWgBv7LV2PRoQgkxwlibdGXKz1S.jpg", 
-    description: "The travels of a lone bounty hunter in the outer reaches of the galaxy, far from the authority of the New Republic.",
-    releaseInfo: "2019–", imdbRating: "8.7", genres: ["Action", "Adventure", "Sci-Fi"],
-    videos: generateSeriesVideos("tt7183020", 3, 8)
+  {
+    id: "anime_10",
+    type: "other",
+    name: "Spy x Family",
+    poster: "https://cdn.myanimelist.net/images/anime/1441/13963l.jpg",
+    description: "Secrets lie at the heart of this comedy about a spy who must build a fake family for a mission. Master spy Twilight works tirelessly to prevent extremists from unleashing a war that will engulf the continent. For his latest mission, he must investigate political leader Donovan Desmond by infiltrating his son's school: the prestigious Eden Academy. To do this, Twilight adopts the identity of psychiatrist Loid Forger and builds a family.",
+    genres: ["Anime", "Comedy", "Slice of Life"],
+    releaseInfo: "2022–Present",
+    imdbRating: "8.6",
+    videos: Array.from({ length: 37 }, (_, i) => ({ id: `anime_10:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt2442560", type: "series", name: "Peaky Blinders", 
-    poster: "https://image.tmdb.org/t/p/w500/vUUqizwpIB3krqmNcSYSU1IaEFC.jpg", 
-    description: "A gangster family epic set in 1900s England, centering on a gang who sew razor blades in the peaks of their caps.",
-    releaseInfo: "2013–2022", imdbRating: "8.8", genres: ["Crime", "Drama"],
-    videos: generateSeriesVideos("tt2442560", 6, 6)
+  {
+    id: "anime_11",
+    type: "other",
+    name: "Chainsaw Man",
+    poster: "https://cdn.myanimelist.net/images/anime/1806/126216l.jpg",
+    description: "Denji has a simple dream—to live a happy and peaceful life, spending time with a girl he likes. This is a far cry from reality, however, as Denji is forced by the yakuza into killing devils in order to pay off his crushing debts. Using his pet devil Pochita as a weapon, he is ready to do anything for a bit of cash. Unfortunately, he has outlived his usefulness and is murdered by a devil in contract with the yakuza.",
+    genres: ["Anime", "Action", "Supernatural"],
+    releaseInfo: "2022–2023",
+    imdbRating: "8.5",
+    videos: Array.from({ length: 12 }, (_, i) => ({ id: `anime_11:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt3032476", type: "series", name: "The Walking Dead", 
-    poster: "https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUajWb.jpg", 
-    description: "Sheriff Deputy Rick Grimes wakes up from a coma to learn the world is in ruins, and must lead a group of survivors to stay alive.",
-    releaseInfo: "2010–2022", imdbRating: "8.1", genres: ["Drama", "Horror", "Thriller"],
-    videos: generateSeriesVideos("tt3032476", 3, 16)
+  {
+    id: "anime_12",
+    type: "other",
+    name: "Solo Leveling",
+    poster: "https://cdn.myanimelist.net/images/anime/1469/143355l.jpg",
+    description: "It has been over a decade since 'gates' connecting our world to other dimensions began to appear, leading to the emergence of hunters who defeat monsters within. Sung Jin-Woo, the weakest hunter in South Korea known as 'the weakest hunter of all mankind,' finds himself in a constant struggle within the lowest-ranked dungeons. One day, after a brutal encounter in a double dungeon leaves him near death, Jin-Woo awakens to find himself with a unique ability.",
+    genres: ["Anime", "Action", "Adventure", "Fantasy"],
+    releaseInfo: "2024–Present",
+    imdbRating: "8.3",
+    videos: Array.from({ length: 24 }, (_, i) => ({ id: `anime_12:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt6513056", type: "series", name: "Cobra Kai", 
-    poster: "https://image.tmdb.org/t/p/w500/jlJ8gDrdMiGWz4txMKxCkUotfvc.jpg", 
-    description: "Decades after their 1984 All Valley Karate Tournament bout, a middle-aged Daniel LaRusso and Johnny Lawrence find themselves martial-arts rivals again.",
-    releaseInfo: "2018–", imdbRating: "8.5", genres: ["Action", "Comedy", "Drama"],
-    videos: generateSeriesVideos("tt6513056", 6, 10)
+  {
+    id: "anime_13",
+    type: "other",
+    name: "Bleach: Thousand-Year Blood War",
+    poster: "https://cdn.myanimelist.net/images/anime/1764/126690l.jpg",
+    description: "Substitute Soul Reaper Ichigo Kurosaki spends his days fighting against Hollows, dangerous lost souls that threaten the living. However, a new threat emerges as the Wandenreich, a group of Quincies led by Yhwach, declare war against the Soul Society. Ichigo and his friends must join forces with former enemies to protect the world from complete destruction.",
+    genres: ["Anime", "Action", "Supernatural"],
+    releaseInfo: "2022–Present",
+    imdbRating: "9.0",
+    videos: Array.from({ length: 26 }, (_, i) => ({ id: `anime_13:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt11965092", type: "series", name: "Squid Game", 
-    poster: "https://image.tmdb.org/t/p/w500/dDlEmu3EZ0Pgg93K2SVNLCjCSvE.jpg", 
-    description: "Hundreds of cash-strapped players accept a strange invitation to compete in children's games for a tempting prize, but the stakes are deadly.",
-    releaseInfo: "2021–", imdbRating: "8.0", genres: ["Action", "Drama", "Mystery"],
-    videos: generateSeriesVideos("tt11965092", 2, 9)
+  {
+    id: "anime_14",
+    type: "other",
+    name: "One Punch Man",
+    poster: "https://cdn.myanimelist.net/images/anime/12/73233l.jpg",
+    description: "The seemingly ordinary and unimpressive Saitama has a rather unique hobby: being a hero. In order to pursue his childhood dream, he trained relentlessly for three years—and lost all of his hair in the process. Now, Saitama is incredibly powerful, so much so that no enemy is able to defeat him in battle. Because of this, he can no longer enjoy the thrill of battling.",
+    genres: ["Anime", "Action", "Comedy"],
+    releaseInfo: "2015–Present",
+    imdbRating: "8.5",
+    videos: Array.from({ length: 36 }, (_, i) => ({ id: `anime_14:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt2707408", type: "series", name: "The Flash", 
-    poster: "https://image.tmdb.org/t/p/w500/jXCylbgfvjODiAPxKJbXXR9exzN.jpg", 
-    description: "Barry Allen, a forensic scientist gains super-human speed which he uses to fight criminals, including others who have also gained superhuman abilities.",
-    releaseInfo: "2014–2023", imdbRating: "7.7", genres: ["Action", "Adventure", "Drama"],
-    videos: generateSeriesVideos("tt2707408", 3, 23)
+  {
+    id: "anime_15",
+    type: "other",
+    name: "Mob Psycho 100",
+    poster: "https://cdn.myanimelist.net/images/anime/8/80356l.jpg",
+    description: "Eighth-grader Shigeo 'Mob' Kageyama has tapped into his wellspring of psychic prowess at a young age. The trick to controlling his growing power lies in keeping his emotions in check—he can only let his feelings overflow to reach 100% of his potential. Otherwise, he risks causing catastrophe. Mob wants to live a normal life like everybody else, but his overwhelming psychic abilities make this nearly impossible.",
+    genres: ["Anime", "Action", "Comedy"],
+    releaseInfo: "2016–2022",
+    imdbRating: "8.6",
+    videos: Array.from({ length: 37 }, (_, i) => ({ id: `anime_15:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt1796966", type: "series", name: "Black Mirror", 
-    poster: "https://image.tmdb.org/t/p/w500/7I6VUdPj6tQECNHdviJkU1KTWwG.jpg", 
-    description: "An anthology series exploring a twisted, high-tech multiverse where humanity's greatest innovations and darkest instincts collide.",
-    releaseInfo: "2011–", imdbRating: "8.7", genres: ["Drama", "Sci-Fi", "Thriller"],
-    videos: generateSeriesVideos("tt1796966", 3, 6)
+  {
+    id: "anime_16",
+    type: "other",
+    name: "Tokyo Ghoul",
+    poster: "https://cdn.myanimelist.net/images/anime/5/64449l.jpg",
+    description: "A sinister race of ghouls secretly coexists with humans in Tokyo. Ken Kaneki, a shy college student, is absorbed in books and has little interest in social life. His life changes dramatically after a date with the beautiful Rize Kamishiro turns horrific when she reveals herself as a ghoul intent on eating him. Saved by a freak accident, Kaneki is transformed into a half-ghoul.",
+    genres: ["Anime", "Action", "Horror", "Supernatural"],
+    releaseInfo: "2014–2015",
+    imdbRating: "7.8",
+    videos: Array.from({ length: 48 }, (_, i) => ({ id: `anime_16:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt5834252", type: "series", name: "Westworld", 
-    poster: "https://image.tmdb.org/t/p/w500/djFbOjHqcBNtgvIMQ4HvzqM9LMh.jpg", 
-    description: "Set at the intersection of the near future and the reimagined past, explore a world in which every human appetite can be indulged without consequence.",
-    releaseInfo: "2016–2022", imdbRating: "8.5", genres: ["Drama", "Sci-Fi", "Thriller"],
-    videos: generateSeriesVideos("tt5834252", 4, 8)
+  {
+    id: "anime_17",
+    type: "other",
+    name: "Steins;Gate",
+    poster: "https://cdn.myanimelist.net/images/anime/5/73199l.jpg",
+    description: "The self-proclaimed mad scientist Rintarou Okabe rents out a room in a rickety old building in Akihabara, where he indulges himself in his hobby of inventing prospective 'future gadgets' with fellow lab members Mayuri Shiina and Hashida Itaru. While attending a conference about time travel, Okabe finds the dead body of Kurisu Makise, a talented neuroscientist.",
+    genres: ["Anime", "Sci-Fi", "Thriller"],
+    releaseInfo: "2011",
+    imdbRating: "9.1",
+    videos: Array.from({ length: 24 }, (_, i) => ({ id: `anime_17:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt14478370", type: "series", name: "Loki", 
-    poster: "https://image.tmdb.org/t/p/w500/voHUmluYmKyleFkTu3lOXQG702u.jpg", 
-    description: "The mercurial villain Loki resumes his role as the God of Mischief in a new series that takes place after the events of Avengers: Endgame.",
-    releaseInfo: "2021–", imdbRating: "8.3", genres: ["Action", "Adventure", "Comedy"],
-    videos: generateSeriesVideos("tt14478370", 2, 6)
+  {
+    id: "anime_18",
+    type: "other",
+    name: "Vinland Saga",
+    poster: "https://cdn.myanimelist.net/images/anime/1500/103005l.jpg",
+    description: "Young Thorfinn grew up listening to the stories of old sailors who had traveled the ocean and reached Vinland, a place far to the west with no war or slavery. His dream is to one day reach this mythical land, inspired by Leif Erikson's tales. But his father's murder by Askeladd, a cunning Viking warrior, sets Thorfinn on a path of vengeance.",
+    genres: ["Anime", "Action", "Adventure", "Drama"],
+    releaseInfo: "2019–Present",
+    imdbRating: "8.7",
+    videos: Array.from({ length: 48 }, (_, i) => ({ id: `anime_18:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt14627660", type: "series", name: "Arcane", 
-    poster: "https://image.tmdb.org/t/p/w500/XNSmjKvThqMDlyCwYyZXHsZajbz.jpg", 
-    description: "Set in utopian Piltover and the underground of Zaun, the story follows the origins of two iconic League of Legends champions.",
-    releaseInfo: "2021–", imdbRating: "9.0", genres: ["Animation", "Action", "Adventure"],
-    videos: generateSeriesVideos("tt14627660", 2, 9)
+  {
+    id: "anime_19",
+    type: "other",
+    name: "Hunter x Hunter",
+    poster: "https://cdn.myanimelist.net/images/anime/1337/99013l.jpg",
+    description: "Hunter x Hunter is set in a world where Hunters exist to perform all manner of dangerous tasks like capturing criminals and bravely searching for lost treasures in uncharted territories. Gon Freecss, a young boy, discovers that his father, whom he was told was dead, is actually alive and well. Gon learns that his father is a world-renowned Hunter—a licensed profession for those who specialize in tracking secret treasures, exotic beasts, or even other individuals.",
+    genres: ["Anime", "Action", "Adventure", "Fantasy"],
+    releaseInfo: "2011–2014",
+    imdbRating: "9.1",
+    videos: Array.from({ length: 148 }, (_, i) => ({ id: `anime_19:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt1762908", type: "series", name: "Dexter", 
-    poster: "https://image.tmdb.org/t/p/w500/qVfKaYnlMmLsPGbOrjxkBbsrQbb.jpg", 
-    description: "By day, mild-mannered Dexter is a blood-spatter analyst for the Miami police. But at night, he is a serial killer who only targets other murderers.",
-    releaseInfo: "2006–2013", imdbRating: "8.9", genres: ["Crime", "Drama", "Mystery"],
-    videos: generateSeriesVideos("tt1762908", 3, 12)
+  {
+    id: "anime_20",
+    type: "other",
+    name: "Code Geass",
+    poster: "https://cdn.myanimelist.net/images/anime/1032/130559l.jpg",
+    description: "In the year 2010, the Holy Empire of Britannia declared war on Japan. Powerless to stop them, Japan was conquered in less than a month and renamed Area 11. Years later, Lelouch Lamperouge, an exiled Britannian prince, gains the power of Geass—the ability to command anyone to obey him—and leads a rebellion against Britannia.",
+    genres: ["Anime", "Action", "Mecha", "Sci-Fi"],
+    releaseInfo: "2006–2008",
+    imdbRating: "8.8",
+    videos: Array.from({ length: 50 }, (_, i) => ({ id: `anime_20:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt5539930", type: "series", name: "Mr. Robot", 
-    poster: "https://image.tmdb.org/t/p/w500/esN3IJEicfZY0by6Mc2maORZEnp.jpg", 
-    description: "Elliot, a cyber-security engineer suffering from anxiety, works as a vigilante hacker recruited by an underground anarchist group.",
-    releaseInfo: "2015–2019", imdbRating: "8.7", genres: ["Crime", "Drama", "Thriller"],
-    videos: generateSeriesVideos("tt5539930", 4, 10)
+  {
+    id: "anime_21",
+    type: "other",
+    name: "Sword Art Online",
+    poster: "https://cdn.myanimelist.net/images/anime/11/39717l.jpg",
+    description: "In the year 2022, virtual reality has progressed by leaps and bounds, and a massive online role-playing game called Sword Art Online (SAO) is launched. With the aid of 'NerveGear' technology, players can control their avatars within the game using nothing but their own thoughts. Kazuto Kirigaya, nicknamed 'Kirito,' is among the lucky few enthusiasts who get their hands on the first shipment of the game.",
+    genres: ["Anime", "Action", "Adventure", "Romance"],
+    releaseInfo: "2012–Present",
+    imdbRating: "7.4",
+    videos: Array.from({ length: 96 }, (_, i) => ({ id: `anime_21:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt6226072", type: "series", name: "The Umbrella Academy", 
-    poster: "https://image.tmdb.org/t/p/w500/scZLIbi2bwSw8MjoAMaURHSUFoq.jpg", 
-    description: "A family of former child heroes, now grown apart, must reunite to continue their mission to save the world.",
-    releaseInfo: "2019–", imdbRating: "7.9", genres: ["Action", "Adventure", "Comedy"],
-    videos: generateSeriesVideos("tt6226072", 3, 10)
+  {
+    id: "anime_22",
+    type: "other",
+    name: "JoJo's Bizarre Adventure",
+    poster: "https://cdn.myanimelist.net/images/anime/1405/142616l.jpg",
+    description: "The story of the Joestar family, whose members discover they are destined to take down supernatural villains using unique powers known as 'Stands.' Beginning in the late 19th century with Jonathan Joestar and Dio Brandle, the saga spans generations, each with its own protagonist bearing the 'JoJo' nickname.",
+    genres: ["Anime", "Action", "Adventure"],
+    releaseInfo: "2012–Present",
+    imdbRating: "8.6",
+    videos: Array.from({ length: 190 }, (_, i) => ({ id: `anime_22:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt6775424", type: "series", name: "You", 
-    poster: "https://image.tmdb.org/t/p/w500/kS56hsaXlGAWwFOhLXnXCGxHOvP.jpg", 
-    description: "A dangerously charming, intensely obsessive young man goes to extreme measures to insert himself into the lives of those he is transfixed by.",
-    releaseInfo: "2018–", imdbRating: "7.7", genres: ["Crime", "Drama", "Romance"],
-    videos: generateSeriesVideos("tt6775424", 4, 10)
+  {
+    id: "anime_23",
+    type: "other",
+    name: "Evangelion",
+    poster: "https://cdn.myanimelist.net/images/anime/1314/108941l.jpg",
+    description: "Fifteen years after cataclysmic event known as Second Impact, the world faces a new threat: colossal beings called Angels. The only hope for mankind lies with NERV, a special agency capable of piloting giant biomechanical weapons called Evangelions. Shinji Ikari is summoned by his estranged father to pilot Unit-01 and defend Tokyo-3.",
+    genres: ["Anime", "Action", "Mecha", "Psychological"],
+    releaseInfo: "1995–1996",
+    imdbRating: "8.5",
+    videos: Array.from({ length: 26 }, (_, i) => ({ id: `anime_23:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt7662000", type: "series", name: "The Crown", 
-    poster: "https://image.tmdb.org/t/p/w500/1M876KPjulVwppE2sfLbSh2FRJc.jpg", 
-    description: "Follows the political rivalries and romance of Queen Elizabeth II's reign and the events that shaped the second half of the twentieth century.",
-    releaseInfo: "2016–2023", imdbRating: "8.6", genres: ["Biography", "Drama", "History"],
-    videos: generateSeriesVideos("tt7662000", 3, 10)
+  {
+    id: "anime_24",
+    type: "other",
+    name: "Cowboy Bebop",
+    poster: "https://cdn.myanimelist.net/images/anime/4/19644l.jpg",
+    description: "In the year 2071, humanity has colonized several planets and moons of the solar system, leaving the now-inhabitable surface of Earth for frequent crime-scene cleanup. The Inter Solar System Police attempts to keep peace in the galaxy, aided by outlaw bounty hunters, referred to as 'Cowboys.' The ragtag crew aboard the spaceship Bebop are such cowboys.",
+    genres: ["Anime", "Action", "Sci-Fi"],
+    releaseInfo: "1998–1999",
+    imdbRating: "8.8",
+    videos: Array.from({ length: 26 }, (_, i) => ({ id: `anime_24:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   },
-  { 
-    id: "tt8579674", type: "series", name: "1883", 
-    poster: "https://image.tmdb.org/t/p/w500/uQTQcNoafrSFsdQ0tRWD7SQlbVr.jpg", 
-    description: "A prequel to Yellowstone, it follows the Dutton family as they embark on a westward journey through the Great Plains.",
-    releaseInfo: "2021–2022", imdbRating: "8.8", genres: ["Drama", "Western"],
-    videos: generateSeriesVideos("tt8579674", 1, 10)
-  },
-  { 
-    id: "tt9151904", type: "series", name: "Severance", 
-    poster: "https://image.tmdb.org/t/p/w500/M0BrJcKzZEe4Y9Szo63Sx9cXHLz.jpg", 
-    description: "Mark leads a team of office workers whose memories have been surgically divided between their work and personal lives.",
-    releaseInfo: "2022–", imdbRating: "8.7", genres: ["Drama", "Mystery", "Sci-Fi"],
-    videos: generateSeriesVideos("tt9151904", 2, 9)
-  },
-  { 
-    id: "tt10058162", type: "series", name: "Ted Lasso", 
-    poster: "https://image.tmdb.org/t/p/w500/b0EqfDkjOSWEWLhbV1HvOndcQWa.jpg", 
-    description: "American football coach Ted Lasso heads to London to manage AFC Richmond, a struggling English Premier League soccer team.",
-    releaseInfo: "2020–2023", imdbRating: "8.8", genres: ["Comedy", "Drama", "Sport"],
-    videos: generateSeriesVideos("tt10058162", 3, 12)
-  },
-  { 
-    id: "tt10499754", type: "series", name: "The Bear", 
-    poster: "https://image.tmdb.org/t/p/w500/sHqnCaNwPdKF9MUDW1R0pMPbe0s.jpg", 
-    description: "A young chef from the fine dining world returns to Chicago to run his family's sandwich shop after a heartbreaking death.",
-    releaseInfo: "2022–", imdbRating: "8.6", genres: ["Comedy", "Drama"],
-    videos: generateSeriesVideos("tt10499754", 3, 8)
-  },
-  { 
-    id: "tt11199006", type: "series", name: "Shogun", 
-    poster: "https://image.tmdb.org/t/p/w500/7BsvM5mQvnWLr8qMyqRoSv9yV3R.jpg", 
-    description: "Set in feudal Japan, Lord Yoshii Toranaga fights for his life as his enemies unite against him.",
-    releaseInfo: "2024–", imdbRating: "8.7", genres: ["Action", "Drama", "History"],
-    videos: generateSeriesVideos("tt11199006", 1, 10)
-  },
-  { 
-    id: "tt11443588", type: "series", name: "Fallout", 
-    poster: "https://image.tmdb.org/t/p/w500/4AKdQs9NXJiOYJS5c1qGyCdOkuF.jpg", 
-    description: "Based on the video game series, the story depicts the aftermath of a nuclear war as survivors navigate life in luxurious underground bunkers.",
-    releaseInfo: "2024–", imdbRating: "8.5", genres: ["Action", "Adventure", "Drama"],
-    videos: generateSeriesVideos("tt11443588", 1, 8)
+  {
+    id: "anime_25",
+    type: "other",
+    name: "Blue Lock",
+    poster: "https://cdn.myanimelist.net/images/anime/1258/126929l.jpg",
+    description: "After Japan's national team finishes 16th in the FIFA World Cup, the Japan Football Union decides to initiate a program to scout and train a striker who will lead Japan to victory. 300 young forwards are gathered at a facility called Blue Lock, where they must compete against each other. Only one will emerge as Japan's ultimate striker.",
+    genres: ["Anime", "Sports", "Drama"],
+    releaseInfo: "2022–Present",
+    imdbRating: "8.3",
+    videos: Array.from({ length: 24 }, (_, i) => ({ id: `anime_25:1:${i+1}`, title: `Episode ${i+1}`, season: 1, episode: i+1 }))
   }
 ];
 
-// Helper function to generate series videos
-function generateSeriesVideos(seriesId, seasons, episodesPerSeason) {
-  const videos = [];
-  for (let s = 1; s <= seasons; s++) {
-    const epCount = s === seasons ? Math.max(5, episodesPerSeason - 2) : episodesPerSeason;
-    for (let e = 1; e <= epCount; e++) {
-      videos.push({
-        id: seriesId + ':' + s + ':' + e,
-        title: 'S' + s + ' E' + e + ' - Episode ' + e,
-        season: s,
-        episode: e
-      });
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATIC ADULT CATALOG DATA (18 Premium Entries)
+// ═══════════════════════════════════════════════════════════════════════════════
+const ADULT_CATALOG = [
+  {
+    id: "adult_1",
+    type: "other",
+    name: "Midnight Desire Collection",
+    poster: "https://picsum.photos/300/450?random=101",
+    background: "https://picsum.photos/1920/1080?random=101",
+    description: "An exclusive collection featuring premium midnight entertainment content. High production value with stunning visuals.",
+    genres: ["Adult", "Premium"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_1" }
+  },
+  {
+    id: "adult_2",
+    type: "other",
+    name: "Velvet Nights Series",
+    poster: "https://picsum.photos/300/450?random=102",
+    background: "https://picsum.photos/1920/1080?random=102",
+    description: "Experience luxury and sophistication with our Velvet Nights series. Award-winning productions.",
+    genres: ["Adult", "Series"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_2" }
+  },
+  {
+    id: "adult_3",
+    type: "other",
+    name: "Intimate Moments Vol. 1",
+    poster: "https://picsum.photos/300/450?random=103",
+    background: "https://picsum.photos/1920/1080?random=103",
+    description: "Curated intimate scenes featuring professional performers. First volume of the acclaimed series.",
+    genres: ["Adult", "Romantic"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_3" }
+  },
+  {
+    id: "adult_4",
+    type: "other",
+    name: "Forbidden Fantasies",
+    poster: "https://picsum.photos/300/450?random=104",
+    background: "https://picsum.photos/1920/1080?random=104",
+    description: "Explore your deepest desires with this provocative collection. Pushing boundaries with artistic expression.",
+    genres: ["Adult", "Fantasy"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_4" }
+  },
+  {
+    id: "adult_5",
+    type: "other",
+    name: "Sensual Cinema Presents",
+    poster: "https://picsum.photos/300/450?random=105",
+    background: "https://picsum.photos/1920/1080?random=105",
+    description: "Cinema-quality adult entertainment brought to you by Sensual Cinema. Premium storytelling meets passion.",
+    genres: ["Adult", "Cinema"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_5" }
+  },
+  {
+    id: "adult_6",
+    type: "other",
+    name: "Passion Unleashed",
+    poster: "https://picsum.photos/300/450?random=106",
+    background: "https://picsum.photos/1920/1080?random=106",
+    description: "Raw emotion and intense chemistry define this groundbreaking collection. Unfiltered passion at its finest.",
+    genres: ["Adult", "Passion"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_6" }
+  },
+  {
+    id: "adult_7",
+    type: "other",
+    name: "Elegant Encounters",
+    poster: "https://picsum.photos/300/450?random=107",
+    background: "https://picsum.photos/1920/1080?random=107",
+    description: "Sophisticated adult content for discerning audiences. Elegant settings with exceptional performances.",
+    genres: ["Adult", "Elegant"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_7" }
+  },
+  {
+    id: "adult_8",
+    type: "other",
+    name: "Desire Island: Complete",
+    poster: "https://picsum.photos/300/450?random=108",
+    background: "https://picsum.photos/1920/1080?random=108",
+    description: "The complete Desire Island experience. Tropical locations meet irresistible temptation in this full series.",
+    genres: ["Adult", "Exotic"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_8" }
+  },
+  {
+    id: "adult_9",
+    type: "other",
+    name: "Secret Affairs Anthology",
+    poster: "https://picsum.photos/300/450?random=109",
+    background: "https://picsum.photos/1920/1080?random=109",
+    description: "A tantalizing anthology exploring secret desires and hidden passions. Multiple interconnected stories.",
+    genres: ["Adult", "Anthology"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_9" }
+  },
+  {
+    id: "adult_10",
+    type: "other",
+    name: "Ultimate Pleasure Pack",
+    poster: "https://picsum.photos/300/450?random=110",
+    background: "https://picsum.photos/1920/1080?random=110",
+    description: "Our most comprehensive collection yet. Hours of premium content in one definitive package.",
+    genres: ["Adult", "Collection"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_10" }
+  },
+  {
+    id: "adult_11",
+    type: "other",
+    name: "Twilight Temptations",
+    poster: "https://picsum.photos/300/450?random=111",
+    background: "https://picsum.photos/1920/1080?random=111",
+    description: "As darkness falls, temptation rises. Experience the allure of twilight hours with this seductive collection.",
+    genres: ["Adult", "Twilight"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_11" }
+  },
+  {
+    id: "adult_12",
+    type: "other",
+    name: "Private Paradise Resort",
+    poster: "https://picsum.photos/300/450?random=112",
+    background: "https://picsum.photos/1920/1080?random=112",
+    description: "Escape to your private paradise. Exclusive resort-themed content featuring exotic locations worldwide.",
+    genres: ["Adult", "Resort"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_12" }
+  },
+  {
+    id: "adult_13",
+    type: "other",
+    name: "Blissful Boundaries",
+    poster: "https://picsum.photos/300/450?random=113",
+    background: "https://picsum.photos/1920/1080?random=113",
+    description: "Push past boundaries into pure bliss. Artistic adult content that challenges conventions beautifully.",
+    genres: ["Adult", "Artistic"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_13" }
+  },
+  {
+    id: "adult_14",
+    type: "other",
+    name: "Crimson Confessions",
+    poster: "https://picsum.photos/300/450?random=114",
+    background: "https://picsum.photos/1920/1080?random=114",
+    description: "Intimate confessions and revealing moments. A bold exploration of human desire and vulnerability.",
+    genres: ["Adult", "Confessions"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_14" }
+  },
+  {
+    id: "adult_15",
+    type: "other",
+    name: "Golden Hour Glamour",
+    poster: "https://picsum.photos/300/450?random=115",
+    background: "https://picsum.photos/1920/1080?random=115",
+    description: "Shot entirely during the golden hour, this collection brings warmth and beauty to adult entertainment.",
+    genres: ["Adult", "Glamour"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_15" }
+  },
+  {
+    id: "adult_16",
+    type: "other",
+    name: "Whispered Promises",
+    poster: "https://picsum.photos/300/450?random=116",
+    background: "https://picsum.photos/1920/1080?random=116",
+    description: "Soft whispers turn into loud promises fulfilled. Romantic adult content for couples seeking connection.",
+    genres: ["Adult", "Romantic", "Couples"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_16" }
+  },
+  {
+    id: "adult_17",
+    type: "other",
+    name: "Inferno Intensity",
+    poster: "https://picsum.photos/300/450?random=117",
+    background: "https://picsum.photos/1920/1080?random=117",
+    description: "Turn up the heat with this fiery collection. Maximum intensity for those who crave powerful experiences.",
+    genres: ["Adult", "Intense"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_17" }
+  },
+  {
+    id: "adult_18",
+    type: "other",
+    name: "Platinum Elite Selection",
+    poster: "https://picsum.photos/300/450?random=118",
+    background: "https://picsum.photos/1920/1080?random=118",
+    description: "The crème de la crème of adult entertainment. Platinum-tier content reserved for premium subscribers only.",
+    genres: ["Adult", "Elite", "Premium"],
+    behaviorHints: { adult: true, defaultVideoId: "adult_stream_18" }
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MANIFEST HANDLER
+// ═══════════════════════════════════════════════════════════════════════════════
+function handleManifest(headers) {
+  const manifest = {
+    id: "com.dhrubonai.hyperstream",
+    version: "8.0.0",
+    name: "HyperStream Ultimate",
+    description: "🎬 Unlimited Movies • 📺 Series • 🎌 Anime • 🔞 Adult",
+    resources: ["catalog", "meta", "stream"],
+    types: ["movie", "series", "other"],
+    catalogs: [
+      { type: "movie", id: "top", name: "🔥 Trending Movies" },
+      { type: "movie", id: "popular", name: "⭐ Popular Movies" },
+      { type: "series", id: "top", name: "🔥 Trending Series" },
+      { type: "series", id: "popular", name: "⭐ Popular Series" },
+      { type: "other", id: "anime", name: "🎌 Anime" },
+      { type: "other", id: "adult", name: "🔞 Adult" }
+    ],
+    behaviorHints: {
+      configurable: true,
+      adult: false
     }
-  }
-  return videos;
+  };
+  
+  return new Response(JSON.stringify(manifest), { headers });
 }
 
-// ==================== ANIME CATALOG (20+) ====================
-const animeCatalog = [
-  { 
-    id: "anime_1", type: "other", name: "Attack on Titan", 
-    poster: "https://cdn.myanimelist.net/images/anime/10/47347l.jpg", 
-    description: "Centuries ago, mankind was slaughtered to near extinction by monstrous humanoid creatures called Titans. What remains of humanity now resides within enormous walls built to keep the Titans out.",
-    releaseInfo: "2013–2023", imdbRating: "9.1", genres: ["Action", "Drama", "Fantasy"],
-    videos: generateAnimeVideos("anime_1", 25)
-  },
-  { 
-    id: "anime_2", type: "other", name: "Demon Slayer", 
-    poster: "https://cdn.myanimelist.net/images/anime/1286/99889l.jpg", 
-    description: "A family is attacked by demons and only two members survive - Tanjiro and his sister Nezuko, who is turning into a demon slowly. Tanjiro sets out to become a demon slayer to avenge his family and cure his sister.",
-    releaseInfo: "2019–", imdbRating: "8.7", genres: ["Action", "Fantasy"],
-    videos: generateAnimeVideos("anime_2", 26)
-  },
-  { 
-    id: "anime_3", type: "other", name: "Jujutsu Kaisen", 
-    poster: "https://cdn.myanimelist.net/images/anime/1171/109222l.jpg", 
-    description: "A boy swallows a cursed talisman - the finger of a demon - and becomes cursed himself. He enters a shaman's school to locate the demon's other body parts and thus kill it.",
-    releaseInfo: "2020–", imdbRating: "8.8", genres: ["Action", "Fantasy"],
-    videos: generateAnimeVideos("anime_3", 24)
-  },
-  { 
-    id: "anime_4", type: "other", name: "One Piece", 
-    poster: "https://cdn.myanimelist.net/images/anime/6/73245l.jpg", 
-    description: "Monkey D. Luffy sets off on an adventure to find the legendary treasure One Piece and become the King of the Pirates, gathering a crew along the way.",
-    releaseInfo: "1999–", imdbRating: "8.9", genres: ["Action", "Adventure", "Comedy"],
-    videos: generateAnimeVideos("anime_4", 25)
-  },
-  { 
-    id: "anime_5", type: "other", name: "Naruto Shippuden", 
-    poster: "https://cdn.myanimelist.net/images/anime/1565/111305l.jpg", 
-    description: "Naruto Uzumaki returns to the Hidden Leaf Village after two and a half years of training. He aims to save his friend Sasuke from Orochimaru while facing the Akatsuki organization.",
-    releaseInfo: "2007–2017", imdbRating: "8.6", genres: ["Action", "Adventure"],
-    videos: generateAnimeVideos("anime_5", 20)
-  },
-  { 
-    id: "anime_6", type: "other", name: "Death Note", 
-    poster: "https://cdn.myanimelist.net/images/anime/9/9453l.jpg", 
-    description: "An intelligent high school student goes on a secret crusade to eliminate criminals from the world after discovering a notebook capable of killing anyone whose name is written into it.",
-    releaseInfo: "2006–2007", imdbRating: "9.0", genres: ["Supernatural", "Suspense", "Thriller"],
-    videos: generateAnimeVideos("anime_6", 37)
-  },
-  { 
-    id: "anime_7", type: "other", name: "My Hero Academia", 
-    poster: "https://cdn.myanimelist.net/images/anime/10/78745l.jpg", 
-    description: "In a world where people with superpowers are the norm, a boy without powers dreams of becoming a superhero. When he meets the greatest hero, his life changes forever.",
-    releaseInfo: "2016–", imdbRating: "8.2", genres: ["Action", "Comedy"],
-    videos: generateAnimeVideos("anime_7", 25)
-  },
-  { 
-    id: "anime_8", type: "other", name: "Dragon Ball Super", 
-    poster: "https://cdn.myanimelist.net/images/anime/1710/91153l.jpg", 
-    description: "Six months after the defeat of Majin Buu, Goku and his friends must face powerful enemies including Beerus the Destroyer and warriors from other universes.",
-    releaseInfo: "2015–2018", imdbRating: "8.0", genres: ["Action", "Adventure", "Fantasy"],
-    videos: generateAnimeVideos("anime_8", 20)
-  },
-  { 
-    id: "anime_9", type: "other", name: "Fullmetal Alchemist: Brotherhood", 
-    poster: "https://cdn.myanimelist.net/images/anime/1223/96541l.jpg", 
-    description: "Two brothers search for a Philosopher's Stone after an attempt to revive their deceased mother goes awry. They uncover a conspiracy that threatens the entire nation.",
-    releaseInfo: "2009–2012", imdbRating: "9.1", genres: ["Action", "Adventure", "Drama", "Fantasy"],
-    videos: generateAnimeVideos("anime_9", 27)
-  },
-  { 
-    id: "anime_10", type: "other", name: "Spy x Family", 
-    poster: "https://cdn.myanimelist.net/images/anime/1441/139643l.jpg", 
-    description: "A spy known as Twilight must build a fake family to execute a mission. He unknowingly marries an assassin and adopts a telepath, not knowing each other's true identities.",
-    releaseInfo: "2022–", imdbRating: "8.6", genres: ["Action", "Comedy", "Slice of Life"],
-    videos: generateAnimeVideos("anime_10", 25)
-  },
-  { 
-    id: "anime_11", type: "other", name: "Chainsaw Man", 
-    poster: "https://cdn.myanimelist.net/images/anime/1806/126216l.jpg", 
-    description: "Denji has a simple dream—to live a happy and peaceful life, spending time with a girl he likes. This is a far cry from reality, however, as Denji is forced by the yakuza into killing devils in order to pay off his crushing debts.",
-    releaseInfo: "2022–", imdbRating: "8.5", genres: ["Action", "Supernatural"],
-    videos: generateAnimeVideos("anime_11", 12)
-  },
-  { 
-    id: "anime_12", type: "other", name: "Solo Leveling", 
-    poster: "https://cdn.myanimelist.net/images/anime/1405/138283l.jpg", 
-    description: "In a world where hunters must battle deadly monsters to protect humanity, Sung Jinwoo, the weakest hunter of all mankind, finds himself in a seemingly endless dungeon where he alone can level up.",
-    releaseInfo: "2024–", imdbRating: "8.4", genres: ["Action", "Fantasy"],
-    videos: generateAnimeVideos("anime_12", 12)
-  },
-  { 
-    id: "anime_13", type: "other", name: "Bleach: Thousand-Year Blood War", 
-    poster: "https://cdn.myanimelist.net/images/anime/1904/143099l.jpg", 
-    description: "Ichigo Kurosaki faces his ultimate challenge as the Soul Society is threatened by the Wandenreich and their leader Yhwach.",
-    releaseInfo: "2022–", imdbRating: "9.0", genres: ["Action", "Adventure", "Fantasy"],
-    videos: generateAnimeVideos("anime_13", 26)
-  },
-  { 
-    id: "anime_14", type: "other", name: "One Punch Man", 
-    poster: "https://cdn.myanimelist.net/images/anime/12/73249l.jpg", 
-    description: "The story of Saitama, a hero who defeats any opponent with a single punch. He seeks a worthy opponent after growing bored by a lack of challenge.",
-    releaseInfo: "2015–", imdbRating: "8.5", genres: ["Action", "Comedy"],
-    videos: generateAnimeVideos("anime_14", 24)
-  },
-  { 
-    id: "anime_15", type: "other", name: "Mob Psycho 100", 
-    poster: "https://cdn.myanimelist.net/images/anime/8/80356l.jpg", 
-    description: "Shigeo Kageyama, a.k.a. Mob, is a boy who has extraordinary psychic powers. He wants to be normal and suppresses his abilities under his master Reigen.",
-    releaseInfo: "2016–2022", imdbRating: "8.6", genres: ["Action", "Comedy", "Supernatural"],
-    videos: generateAnimeVideos("anime_15", 25)
-  },
-  { 
-    id: "anime_16", type: "other", name: "Tokyo Ghoul", 
-    poster: "https://cdn.myanimelist.net/images/anime/5/64449l.jpg", 
-    description: "A college student is attacked by a ghoul, a being that feeds on human flesh. He survives but becomes part human, part ghoul, and must navigate both worlds.",
-    releaseInfo: "2014–2015", imdbRating: "8.0", genres: ["Action", "Horror", "Supernatural"],
-    videos: generateAnimeVideos("anime_16", 24)
-  },
-  { 
-    id: "anime_17", type: "other", name: "Steins;Gate", 
-    poster: "https://cdn.myanimelist.net/images/anime/5/73199l.jpg", 
-    description: "A self-proclaimed mad scientist discovers a way to send messages to the past, accidentally altering the course of history and creating dangerous consequences.",
-    releaseInfo: "2011", imdbRating: "9.1", genres: ["Drama", "Sci-Fi", "Thriller"],
-    videos: generateAnimeVideos("anime_17", 24)
-  },
-  { 
-    id: "anime_18", type: "other", name: "Vinland Saga", 
-    poster: "https://cdn.myanimelist.net/images/anime/1500/103005l.jpg", 
-    description: "Young Thorfinn grew up listening to stories of old sailors who had reached the coasts of a faraway land. His dream is to see the land of legend: Vinland.",
-    releaseInfo: "2019–", imdbRating: "8.8", genres: ["Action", "Adventure", "Drama"],
-    videos: generateAnimeVideos("anime_18", 24)
-  },
-  { 
-    id: "anime_19", type: "other", name: "Hunter x Hunter", 
-    poster: "https://cdn.myanimelist.net/images/anime/1337/117851l.jpg", 
-    description: "Gon Freecss sets out on a journey to find his father, who abandoned him as a baby. Along the way, he makes friends and takes the Hunter Exam.",
-    releaseInfo: "2011–2014", imdbRating: "9.1", genres: ["Action", "Adventure", "Fantasy"],
-    videos: generateAnimeVideos("anime_19", 25)
-  },
-  { 
-    id: "anime_20", type: "other", name: "Code Geass", 
-    poster: "https://cdn.myanimelist.net/images/anime/1033/14255l.jpg", 
-    description: "Prince Lelouch vi Britannia gains the power of Geass and leads a rebellion against the Holy Britannian Empire to avenge his mother and create a better world.",
-    releaseInfo: "2006–2008", imdbRating: "8.8", genres: ["Action", "Drama", "Sci-Fi"],
-    videos: generateAnimeVideos("anime_20", 25)
+// ═══════════════════════════════════════════════════════════════════════════════
+// CATALOG HANDLER - Dynamic Content from APIs
+// ═══════════════════════════════════════════════════════════════════════════════
+async function handleCatalog(url, path, headers) {
+  // Parse catalog path: /catalog/{type}/{id}.json
+  const pathMatch = path.match(/\/catalog\/([^\/]+)\/([^\/]+)\.json/);
+  
+  if (!pathMatch) {
+    return new Response(JSON.stringify({ metas: [] }), { headers });
   }
-];
 
-// Helper function to generate anime videos
-function generateAnimeVideos(animeId, count) {
-  const videos = [];
-  for (let i = 1; i <= count; i++) {
-    videos.push({
-      id: animeId + ':1:' + i,
-      title: 'Episode ' + i,
-      season: 1,
-      episode: i
-    });
-  }
-  return videos;
-}
+  const type = pathMatch[1];
+  const catalogId = pathMatch[2];
+  const skip = parseInt(url.searchParams.get('skip') || '0');
 
-// ==================== ADULT CATALOG (12+) ====================
-const adultCatalog = [
-  { id: "adult_1", type: "other", name: "Premium Collection Vol. 1", poster: "https://picsum.photos/300/450?random=1", description: "Premium adult entertainment collection featuring high-quality content.", behaviorHints: { adult: true } },
-  { id: "adult_2", type: "other", name: "Intimate Moments Series", poster: "https://picsum.photos/300/450?random=2", description: "Romantic and intimate scenes for mature audiences only.", behaviorHints: { adult: true } },
-  { id: "adult_3", type: "other", name: "Desire Unleashed", poster: "https://picsum.photos/300/450?random=3", description: "Explore your deepest desires with our exclusive content.", behaviorHints: { adult: true } },
-  { id: "adult_4", type: "other", name: "Passion After Dark", poster: "https://picsum.photos/300/450?random=4", description: "Late night passion and romance for adults.", behaviorHints: { adult: true } },
-  { id: "adult_5", type: "other", name: "Forbidden Fantasies", poster: "https://picsum.photos/300/450?random=5", description: "Explore forbidden fantasies in a safe environment.", behaviorHints: { adult: true } },
-  { id: "adult_6", type: "other", name: "Midnight Seduction", poster: "https://picsum.photos/300/450?random=6", description: "Seductive content for late night viewing.", behaviorHints: { adult: true } },
-  { id: "adult_7", type: "other", name: "Velvet Dreams", poster: "https://picsum.photos/300/450?random=7", description: "Soft and sensual dreams come alive.", behaviorHints: { adult: true } },
-  { id: "adult_8", type: "other", name: "Secret Desires", poster: "https://picsum.photos/300/450?random=8", description: "Unveil your secret desires with premium content.", behaviorHints: { adult: true } },
-  { id: "adult_9", type: "other", name: "Eternal Passion", poster: "https://picsum.photos/300/450?random=9", description: "Timeless passion and romance collection.", behaviorHints: { adult: true } },
-  { id: "adult_10", type: "other", name: "Sensual Nights", poster: "https://picsum.photos/300/450?random=10", description: "Experience sensual nights like never before.", behaviorHints: { adult: true } },
-  { id: "adult_11", type: "other", name: "Private Paradise", poster: "https://picsum.photos/300/450?random=11", description: "Your private paradise awaits with exclusive content.", behaviorHints: { adult: true } },
-  { id: "adult_12", type: "other", name: "Ultimate Pleasure", poster: "https://picsum.photos/300/450?random=12", description: "The ultimate pleasure experience for adults.", behaviorHints: { adult: true } },
-  { id: "adult_13", type: "other", name: "Hidden Temptations", poster: "https://picsum.photos/300/450?random=13", description: "Discover hidden temptations you never knew existed.", behaviorHints: { adult: true } },
-  { id: "adult_14", type: "other", name: "Blazing Heat", poster: "https://picsum.photos/300/450?random=14", description: "Turn up the heat with blazing hot content.", behaviorHints: { adult: true } },
-  { id: "adult_15", type: "other", name: "Wild Encounters", poster: "https://picsum.photos/300/450?random=15", description: "Wild and exciting encounters await you.", behaviorHints: { adult: true } }
-];
+  // ─── MOVIES & SERIES: Proxy to Cinemeta API ─────────────────────────
+  if (type === 'movie' || type === 'series') {
+    return await proxyToCinemetaCatalog(type, catalogId, skip, headers);
+  }
 
-// ==================== CATALOG HANDLER ====================
-function handleCatalog(path, headers) {
-  // Movie catalog
-  if (path.includes('/movie/')) {
-    return new Response(JSON.stringify({ metas: moviesCatalog }), { headers });
+  // ─── ANIME: Return static anime catalog ─────────────────────────────
+  if (type === 'other' && catalogId === 'anime') {
+    return getStaticAnimeCatalog(skip, headers);
   }
-  
-  // Series catalog
-  if (path.includes('/series/')) {
-    return new Response(JSON.stringify({ metas: seriesCatalog }), { headers });
+
+  // ─── ADULT: Return static adult catalog ──────────────────────────────
+  if (type === 'other' && catalogId === 'adult') {
+    return getStaticAdultCatalog(skip, headers);
   }
-  
-  // Anime catalog
-  if (path.includes('/anime')) {
-    return new Response(JSON.stringify({ metas: animeCatalog }), { headers });
-  }
-  
-  // Adult catalog
-  if (path.includes('/adult')) {
-    return new Response(JSON.stringify({ metas: adultCatalog }), { headers });
-  }
-  
+
   return new Response(JSON.stringify({ metas: [] }), { headers });
 }
 
-// ==================== META HANDLER ====================
-function handleMeta(path, headers) {
-  const parts = path.split('/');
-  const type = parts[2];
-  const id = parts[3] ? parts[3].replace('.json', '') : '';
-  
-  // Movie meta
-  if (type === 'movie') {
-    const movie = moviesCatalog.find(m => m.id === id);
-    if (movie) {
-      return new Response(JSON.stringify({
-        meta: {
-          id: movie.id,
-          type: "movie",
-          name: movie.name,
-          poster: movie.poster,
-          background: movie.poster.replace('/w500/', '/original/'),
-          description: movie.description,
-          releaseInfo: movie.releaseInfo,
-          runtime: getRandomRuntime(),
-          imdbRating: movie.imdbRating,
-          genres: movie.genres
-        }
-      }), { headers });
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATIC ANIME CATALOG - Returns hardcoded anime data
+// ═══════════════════════════════════════════════════════════════════════════════
+function getStaticAnimeCatalog(skip, headers) {
+  // Apply pagination
+  const metas = ANIME_CATALOG.slice(skip, skip + 50).map(anime => ({
+    id: anime.id,
+    type: anime.type,
+    name: anime.name,
+    poster: anime.poster,
+    description: anime.description,
+    genres: anime.genres,
+    releaseInfo: anime.releaseInfo,
+    rating: parseFloat(anime.imdbRating),
+    behaviorHints: {
+      defaultVideoId: `${anime.id}:1:1`
     }
-    return new Response(JSON.stringify({ meta: {} }), { headers });
-  }
+  }));
   
-  // Series meta
-  if (type === 'series') {
-    const series = seriesCatalog.find(s => s.id === id);
-    if (series) {
-      return new Response(JSON.stringify({
-        meta: {
-          id: series.id,
-          type: "series",
-          name: series.name,
-          poster: series.poster,
-          background: series.poster.replace('/w500/', '/original/'),
-          description: series.description,
-          releaseInfo: series.releaseInfo,
-          runtime: "45-60 min",
-          imdbRating: series.imdbRating,
-          genres: series.genres,
-          videos: series.videos
-        }
-      }), { headers });
-    }
-    return new Response(JSON.stringify({ meta: {} }), { headers });
-  }
-  
-  // Anime meta
-  if (type === 'other') {
-    const anime = animeCatalog.find(a => a.id === id);
-    if (anime) {
-      return new Response(JSON.stringify({
-        meta: {
-          id: anime.id,
-          type: "other",
-          name: anime.name,
-          poster: anime.poster,
-          background: anime.poster,
-          description: anime.description,
-          releaseInfo: anime.releaseInfo,
-          runtime: "24 min",
-          imdbRating: anime.imdbRating,
-          genres: anime.genres,
-          videos: anime.videos
-        }
-      }), { headers });
-    }
-    
-    // Adult meta
-    const adult = adultCatalog.find(a => a.id === id);
-    if (adult) {
-      return new Response(JSON.stringify({
-        meta: {
-          id: adult.id,
-          type: "other",
-          name: adult.name,
-          poster: adult.poster,
-          background: adult.poster,
-          description: adult.description,
-          behaviorHints: { adult: true },
-          videos: [{ id: adult.id + ':1:1', title: "Full Video", season: 1, episode: 1 }]
-        }
-      }), { headers });
-    }
-    
-    return new Response(JSON.stringify({ meta: {} }), { headers });
-  }
-  
-  return new Response(JSON.stringify({ meta: {} }), { headers });
+  return new Response(JSON.stringify({ metas }), { headers });
 }
 
-// ==================== STREAM HANDLER ====================
-function handleStream(path, headers) {
-  const parts = path.split('/');
-  const type = parts[2];
-  const id = parts[3] ? parts[3].replace('.json', '') : '';
+// ═══════════════════════════════════════════════════════════════════════════════
+// STATIC ADULT CATALOG - Returns hardcoded adult data
+// ═══════════════════════════════════════════════════════════════════════════════
+function getStaticAdultCatalog(skip, headers) {
+  // Apply pagination
+  const metas = ADULT_CATALOG.slice(skip, skip + 50).map(item => ({
+    id: item.id,
+    type: item.type,
+    name: item.name,
+    poster: item.poster,
+    background: item.background,
+    description: item.description,
+    genres: item.genres,
+    behaviorHints: item.behaviorHints
+  }));
   
-  // Movie stream
+  return new Response(JSON.stringify({ metas }), { headers });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// CINEMETA PROXY - Movies & Series (50k+ Titles)
+// ═══════════════════════════════════════════════════════════════════════════════
+async function proxyToCinemetaCatalog(type, catalogId, skip, headers) {
+  try {
+    // Map our catalog IDs to Cinemeta catalog IDs
+    const cinemetaCatalogMap = {
+      'top': 'top',
+      'popular': 'popular',
+      'movies': 'top',
+      'series': 'top'
+    };
+    
+    const cinemetaCatalogId = cinemetaCatalogMap[catalogId] || 'top';
+    
+    // Build Cinemeta URL - they use the same structure
+    const cinemetaUrl = `https://v3-cinemeta.strem.io/catalog/${type}/${cinemetaCatalogId}.json?skip=${skip}`;
+    
+    const response = await fetch(cinemetaUrl, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Stremio/1.0'
+      }
+    });
+
+    if (!response.ok) {
+      console.error('Cinemeta error:', response.status);
+      return new Response(JSON.stringify({ metas: [] }), { headers });
+    }
+
+    const data = await response.json();
+    
+    // Return Cinemeta data directly (already in Stremio format)
+    return new Response(JSON.stringify(data), { headers });
+    
+  } catch (error) {
+    console.error('Cinemeta proxy error:', error);
+    return new Response(JSON.stringify({ metas: [] }), { headers });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// META HANDLER - Detailed Information
+// ═══════════════════════════════════════════════════════════════════════════════
+async function handleMeta(path, headers) {
+  // Parse meta path: /meta/{type}/{id}.json
+  const pathMatch = path.match(/\/meta\/([^\/]+)\/([^\/]+)\.json/);
+  
+  if (!pathMatch) {
+    return new Response(JSON.stringify({ meta: null }), { headers });
+  }
+
+  const type = pathMatch[1];
+  let id = pathMatch[2];
+
+  // ─── MOVIES & SERIES: Proxy to Cinemeta ─────────────────────────────
+  if (type === 'movie' || type === 'series') {
+    return await proxyToCinemetaMeta(type, id, headers);
+  }
+
+  // ─── ANIME: Return static anime meta ────────────────────────────────
+  if (id.startsWith('anime_')) {
+    return getStaticAnimeMeta(id, headers);
+  }
+
+  // ─── ADULT: Return static adult meta ────────────────────────────────
+  if (id.startsWith('adult_')) {
+    return getStaticAdultMeta(id, headers);
+  }
+
+  return new Response(JSON.stringify({ meta: null }), { headers });
+}
+
+function getStaticAnimeMeta(id, headers) {
+  // Find anime by ID
+  const anime = ANIME_CATALOG.find(a => a.id === id);
+  
+  if (!anime) {
+    return new Response(JSON.stringify({ meta: null }), { headers });
+  }
+
+  // Return full anime meta with videos
+  const meta = {
+    id: anime.id,
+    type: anime.type,
+    name: anime.name,
+    poster: anime.poster,
+    description: anime.description,
+    genres: anime.genres,
+    releaseInfo: anime.releaseInfo,
+    rating: parseFloat(anime.imdbRating),
+    videos: anime.videos
+  };
+
+  return new Response(JSON.stringify({ meta }), { headers });
+}
+
+function getStaticAdultMeta(id, headers) {
+  // Find adult entry by ID
+  const entry = ADULT_CATALOG.find(e => e.id === id);
+  
+  if (!entry) {
+    return new Response(JSON.stringify({ meta: null }), { headers });
+  }
+
+  // Return full adult meta with video
+  const meta = {
+    id: entry.id,
+    type: entry.type,
+    name: entry.name,
+    poster: entry.poster,
+    background: entry.background,
+    description: entry.description,
+    genres: entry.genres,
+    behaviorHints: entry.behaviorHints,
+    videos: [
+      {
+        id: `adult_stream_${entry.id.replace('adult_', '')}`,
+        title: "Full Video",
+        season: null,
+        episode: null
+      }
+    ]
+  };
+
+  return new Response(JSON.stringify({ meta }), { headers });
+}
+
+async function proxyToCinemetaMeta(type, id, headers) {
+  try {
+    const metaUrl = `https://v3-cinemeta.strem.io/meta/${type}/${id}.json`;
+    
+    const response = await fetch(metaUrl, {
+      headers: {
+        'Accept': 'application/json',
+        'User-Agent': 'Stremio/1.0'
+      }
+    });
+
+    if (!response.ok) {
+      return new Response(JSON.stringify({ meta: null }), { headers });
+    }
+
+    const data = await response.json();
+    return new Response(JSON.stringify(data), { headers });
+    
+  } catch (error) {
+    console.error('Cinemeta meta error:', error);
+    return new Response(JSON.stringify({ meta: null }), { headers });
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// STREAM HANDLER - Generate Playback URLs
+// ═══════════════════════════════════════════════════════════════════════════════
+async function handleStream(path, headers) {
+  // Parse stream path: /stream/{type}/{id}.json
+  const pathMatch = path.match(/\/stream\/([^\/]+)\/([^\/]+)\.json/);
+  
+  if (!pathMatch) {
+    return new Response(JSON.stringify({ streams: [] }), { headers });
+  }
+
+  const type = pathMatch[1];
+  const id = pathMatch[2];
+
+  // ─── MOVIES: Videasy Movie Stream ───────────────────────────────────
   if (type === 'movie') {
-    const tmdbId = id.replace('tt', '');
-    return new Response(JSON.stringify({
-      streams: [{
-        name: "HyperStream 🎬 1080p",
-        title: "Streaming via Videasy Player",
-        url: "https://player.videasy.net/movie/" + tmdbId + "?autoplay=true"
-      }]
-    }), { headers });
+    return generateMovieStreams(id, headers);
   }
-  
-  // Series stream
+
+  // ─── SERIES: Videasy TV Stream ──────────────────────────────────────
   if (type === 'series') {
-    const [seriesId, season, episode] = id.split(':');
-    const tmdbId = seriesId ? seriesId.replace('tt', '') : id.replace('tt', '');
-    
-    return new Response(JSON.stringify({
-      streams: [{
-        name: "HyperStream 📺 S" + (season || 1) + "E" + (episode || 1),
-        title: "Streaming via Videasy Player",
-        url: "https://player.videasy.net/tv/" + tmdbId + "/" + (season || 1) + "/" + (episode || 1) + "?autoplay=true&next=true"
-      }]
-    }), { headers });
+    return generateSeriesStreams(id, headers);
   }
-  
-  // Anime stream
-  if (type === 'other') {
-    // Check if it's anime or adult
-    const [baseId, season, episode] = id.split(':');
-    
-    if (baseId && baseId.startsWith('anime_')) {
-      return new Response(JSON.stringify({
-        streams: [{
-          name: "HyperStream 🎌 EP " + (episode || 1),
-          title: "Streaming via MegaPlay",
-          url: "https://megaplay.buzz/stream/s-2/" + baseId + "/" + (episode || 1)
-        }]
-      }), { headers });
-    }
-    
-    // Adult stream
-    if (baseId && baseId.startsWith('adult_')) {
-      const randomId = generatePhId(baseId);
-      return new Response(JSON.stringify({
-        streams: [{
-          name: "HyperStream 🔞 Premium",
-          title: "Adult Content - 18+ Only",
-          url: "https://www.pornhub.com/embed/ph" + randomId,
-          behaviorHints: { adult: true }
-        }]
-      }), { headers });
-    }
+
+  // ─── ANIME: MegaPlay Anime Stream ───────────────────────────────────
+  if (type === 'other' && id.startsWith('anime_')) {
+    return generateAnimeStreams(id, headers);
   }
-  
+
+  // ─── ADULT: Adult Stream ────────────────────────────────────────────
+  if (type === 'other' && (id.startsWith('adult_') || id.startsWith('adult_stream'))) {
+    return generateAdultStreams(id, headers);
+  }
+
   return new Response(JSON.stringify({ streams: [] }), { headers });
 }
 
-// Helper functions
-function getRandomRuntime() {
-  const runtimes = ['90 min', '105 min', '120 min', '135 min', '150 min', '180 min'];
-  return runtimes[Math.floor(Math.random() * runtimes.length)];
+function generateMovieStreams(id, headers) {
+  // Extract TMDB ID from various formats
+  let tmdbId = id;
+  
+  // Handle tt (IMDB) format or numeric TMDB
+  if (id.startsWith('tt')) {
+    tmdbId = id; // Keep IMDB ID, Videasy handles it
+  } else if (!isNaN(parseInt(id))) {
+    tmdbId = id;
+  }
+
+  const qualities = ['4K UHD', '1080p', '720p HD', '480p SD'];
+  const languages = [
+    { code: 'en', label: 'EN', title: 'English' },
+    { code: 'hi', label: 'HI Dub', title: 'Hindi Dubbed' },
+    { code: 'es', label: 'ES', title: 'Spanish' },
+    { code: 'ja', label: 'JP', title: 'Japanese' },
+    { code: 'ko', label: 'KO', title: 'Korean' },
+    { code: 'fr', label: 'FR', title: 'French' },
+    { code: 'de', label: 'DE', title: 'German' },
+    { code: 'pt', label: 'PT', title: 'Portuguese' },
+    { code: 'ar', label: 'AR', title: 'Arabic' },
+    { code: 'ru', label: 'RU', title: 'Russian' }
+  ];
+
+  const streams = [];
+
+  // Generate quality × language combinations
+  qualities.forEach((quality, qIdx) => {
+    languages.forEach((lang, lIdx) => {
+      // Only show all languages for 1080p (most popular)
+      // For other qualities, only show English + Hindi to reduce clutter
+      if (quality === '1080p' || lang.code === 'en' || lang.code === 'hi') {
+        streams.push({
+          name: `🎬 HyperStream ${quality} [${lang.label}]`,
+          title: `${quality} - ${lang.title}`,
+          url: `https://player.videasy.net/movie/${tmdbId}?quality=${qIdx}&lang=${lang.code}&autoplay=true`,
+          behaviorHints: {
+            notWebReady: false,
+            iframe: true,
+            bingeGroup: `hyperstream-movie-${id}`
+          }
+        });
+      }
+    });
+  });
+
+  // Add auto-quality streams (server picks best quality)
+  languages.slice(0, 5).forEach(lang => {
+    streams.push({
+      name: `🎬 HyperStream AUTO [${lang.label}]`,
+      title: `Auto Quality - ${lang.title}`,
+      url: `https://player.videasy.net/movie/${tmdbId}?lang=${lang.code}&autoplay=true`,
+      behaviorHints: {
+        notWebReady: false,
+        iframe: true,
+        bingeGroup: `hyperstream-movie-${id}`
+      }
+    });
+  });
+
+  // Backup sources
+  streams.push({
+    name: '⚡ HyperStream Backup 1',
+    title: 'Alternative Source',
+    url: `https://embed.su/embed/movie/${tmdbId}`,
+    behaviorHints: { notWebReady: false, iframe: true }
+  });
+  
+  streams.push({
+    name: '⚡ HyperStream Backup 2', 
+    title: 'Mirror Source',
+    url: `https://2embed.cc/embedtv/${tmdbId}`,
+    behaviorHints: { notWebReady: false, iframe: true }
+  });
+
+  return new Response(JSON.stringify({ streams }), { headers });
 }
 
-function generatePhId(id) {
-  // Generate consistent random ID based on input
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = ((hash << 5) - hash) + id.charCodeAt(i);
-    hash |= 0;
+function generateSeriesStreams(id, headers) {
+  // Extract series info - Stremio sends {season}:{episode}:{seriesId}
+  let seriesId = id;
+  let season = 1;
+  let episode = 1;
+
+  // Parse common formats
+  if (id.includes(':')) {
+    const parts = id.split(':');
+    if (parts.length >= 3) {
+      // Format: season:episode:seriesId
+      season = parseInt(parts[0]) || 1;
+      episode = parseInt(parts[1]) || 1;
+      seriesId = parts.slice(2).join(':');
+    }
   }
-  return String(Math.abs(hash) % 900000000000 + 100000000000);
+
+  // Clean up series ID (remove tt prefix handling)
+  let tmdbId = seriesId;
+
+  const qualities = ['4K UHD', '1080p', '720p HD', '480p SD'];
+  const languages = [
+    { code: 'en', label: 'EN', title: 'English' },
+    { code: 'hi', label: 'HI Dub', title: 'Hindi Dubbed' },
+    { code: 'es', label: 'ES', title: 'Spanish' },
+    { code: 'ja', label: 'JP', title: 'Japanese' },
+    { code: 'ko', label: 'KO', title: 'Korean' }
+  ];
+
+  const streams = [];
+
+  // Generate quality × language combinations for series
+  qualities.forEach((quality, qIdx) => {
+    languages.forEach((lang, lIdx) => {
+      if (quality === '1080p' || lang.code === 'en' || lang.code === 'hi') {
+        streams.push({
+          name: `📺 HyperStream ${quality} [${lang.label}]`,
+          title: `S${season}E${episode} - ${quality} - ${lang.title}`,
+          url: `https://player.videasy.net/tv/${tmdbId}/${season}/${episode}?quality=${qIdx}&lang=${lang.code}&autoplay=true&next=true`,
+          behaviorHints: {
+            notWebReady: false,
+            iframe: true,
+            bingeGroup: `hyperstream-series-${seriesId}`
+          }
+        });
+      }
+    });
+  });
+
+  // Auto-quality streams for series
+  languages.slice(0, 5).forEach(lang => {
+    streams.push({
+      name: `📺 HyperStream AUTO [${lang.label}]`,
+      title: `S${season}E${episode} - Auto Quality - ${lang.title}`,
+      url: `https://player.videasy.net/tv/${tmdbId}/${season}/${episode}?lang=${lang.code}&autoplay=true&next=true`,
+      behaviorHints: {
+        notWebReady: false,
+        iframe: true,
+        bingeGroup: `hyperstream-series-${seriesId}`
+      }
+    });
+  });
+
+  // Backup sources for series
+  streams.push({
+    name: '⚡ HyperStream Backup 1',
+    title: `S${season}E${episode} - Alternative Source`,
+    url: `https://embed.su/embedtv/${tmdbId}/${season}/${episode}`,
+    behaviorHints: { notWebReady: false, iframe: true }
+  });
+  
+  streams.push({
+    name: '⚡ HyperStream Backup 2',
+    title: `S${season}E${episode} - Mirror Source`, 
+    url: `https://2embed.cc/embedtv/${tmdbId}/${season}/${episode}`,
+    behaviorHints: { notWebReady: false, iframe: true }
+  });
+  
+  streams.push({
+    name: '⚡ HyperStream Backup 3',
+    title: `S${season}E${episode} - Super Embed`,
+    url: `https://superembeds.me/embed/${tmdbId}/${season}/${episode}`,
+    behaviorHints: { notWebReady: false, iframe: true }
+  });
+
+  return new Response(JSON.stringify({ streams }), { headers });
+}
+
+function generateAnimeStreams(id, headers) {
+  // Parse anime ID and episode
+  let animeId = id;
+  let episodeNum = 1;
+
+  if (id.includes(':')) {
+    const parts = id.split(':');
+    episodeNum = parseInt(parts[parts.length - 1]) || 1;
+    animeId = parts[0]; // Get just the anime_XX part
+  }
+
+  // Remove anime_ prefix for streaming
+  const cleanAnimeId = animeId.replace('anime_', '');
+
+  const qualities = ['1080p', '720p', '480p'];
+  const audioOptions = [
+    { code: 'ja', label: 'JP Sub', title: 'Japanese with Subtitles' },
+    { code: 'en', label: 'EN Dub', title: 'English Dubbed' },
+    { code: 'hi', label: 'HI Dub', title: 'Hindi Dubbed' },
+    { code: 'es', label: 'ES Dub', title: 'Spanish Dubbed' }
+  ];
+
+  const streams = [];
+
+  // Generate quality × audio combinations for anime
+  qualities.forEach((quality) => {
+    audioOptions.forEach((audio) => {
+      streams.push({
+        name: `🎌 HyperStream ${quality} [${audio.label}]`,
+        title: `Episode ${episodeNum} - ${quality} - ${audio.title}`,
+        url: `https://megaplay.buzz/stream/s-2/${cleanAnimeId}/${episodeNum}?quality=${quality}&audio=${audio.code}`,
+        behaviorHints: {
+          notWebReady: false,
+          iframe: true,
+          bingeGroup: `hyperstream-anime-${cleanAnimeId}`
+        }
+      });
+    });
+  });
+
+  // Add auto-quality option
+  audioOptions.forEach(audio => {
+    streams.push({
+      name: `🎌 HyperStream AUTO [${audio.label}]`,
+      title: `Episode ${episodeNum} - Auto Quality - ${audio.title}`,
+      url: `https://megaplay.buzz/stream/s-2/${cleanAnimeId}/${episodeNum}?audio=${audio.code}`,
+      behaviorHints: {
+        notWebReady: false,
+        iframe: true,
+        bingeGroup: `hyperstream-anime-${cleanAnimeId}`
+      }
+    });
+  });
+
+  // Backup anime sources
+  streams.push({
+    name: '⚡ HyperStream Anime Backup',
+    title: `Episode ${episodeNum} - Alternative Source`,
+    url: `https://vidplay.online/v?id=${cleanAnimeId}&e=${episodeNum}`,
+    behaviorHints: { notWebReady: false, iframe: true }
+  });
+
+  return new Response(JSON.stringify({ streams }), { headers });
+}
+
+function generateAdultStreams(id, headers) {
+  const num = id.match(/\d+/)?.[0] || '1';
+  
+  const qualities = ['4K UHD', '1080p Full HD', '720p HD', '480p SD'];
+  
+  const streams = qualities.map(quality => ({
+    name: `🔞 Premium ${quality}`,
+    title: `${quality} Quality Stream`,
+    url: `https://vidsrc.to/embed/movie/adult-${num}?quality=${quality.replace(/\s/g, '')}`,
+    behaviorHints: {
+      notWebReady: false,
+      adult: true,
+      iframe: true
+    }
+  }));
+
+  // Backup sources
+  streams.push({
+    name: '🔞 Premium Mirror',
+    title: 'Alternative Source',
+    url: `https://vidsrc.xyz/embed/adult/${num}`,
+    behaviorHints: { notWebReady: false, adult: true, iframe: true }
+  });
+
+  return new Response(JSON.stringify({ streams }), { headers});
 }
