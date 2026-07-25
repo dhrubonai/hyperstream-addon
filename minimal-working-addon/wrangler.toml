@@ -1,0 +1,6 @@
+name = "minimal-working-addon"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# Deploy with: wrangler deploy
+# Then install in Stremio: https://your-worker.workers.dev/manifest.json
